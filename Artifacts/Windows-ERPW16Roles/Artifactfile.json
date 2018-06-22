@@ -6,7 +6,7 @@
     "Windows",
     "ERP"
   ],
-  "iconUri": "https://raw.githubusercontent.com/arturlyd/MyAzureArtifacts/master/Artifacts/Windows-ERPW16Roles/ERPW16Roles.png",
+  "iconUri": "https://raw.githubusercontent.com/arturlyd/MyAzureArtifacts/master/Artifacts/Windows-ERPW16Roles/ERP.ico",
   "targetOsType": "Windows",
   "runCommand": {
     "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPW16Roles.ps1')]"
