@@ -7,7 +7,7 @@
     "Windows",
     "ERP"
   ],
-  "iconUri": "https://raw.githubusercontent.com/arturlyd/MyAzureArtifacts/master/Artifacts/Windows-ERPDL102200-0/ERP.ico",
+  "iconUri": "https://raw.githubusercontent.com/arturlyd/MyAzureArtifacts/master/Artifacts/Windows-ERP102200-0/ERP.ico",
   "targetOsType": "Windows",
   "runCommand": {
     "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPDL1022000.ps1')]"
