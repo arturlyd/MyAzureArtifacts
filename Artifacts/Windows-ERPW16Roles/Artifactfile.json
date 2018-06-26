@@ -12,7 +12,4 @@
   "runCommand": {
     "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPW16Roles.ps1')]"
   }
-  "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./startChocolatey.ps1 -PackageList ', 'azurepowershell', '\"')]"
-  }
 }
