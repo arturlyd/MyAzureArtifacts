@@ -11,6 +11,8 @@
   "targetOsType": "Windows",
   "runCommand": {
     "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPW16Roles.ps1')]"
-	"commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./startChocolatey.ps1 -PackageList ', 'azurepowershell', '\"')]"
+  }
+  "runCommand": {
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy bypass \"& ./startChocolatey.ps1 -PackageList ', 'azurepowershell', '\"')]"
   }
 }
