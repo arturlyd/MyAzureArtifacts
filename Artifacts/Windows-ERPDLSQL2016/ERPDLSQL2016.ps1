@@ -27,8 +27,8 @@ if(!(Test-Path -Path $targetDir )){
     New-Item -ItemType directory -Path $targetDir
 }
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobName -Destination ($targetDir + $blobName) -Context $StorageContext -Force #download SQL Server ISO
-Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobName -Destination ($targetDir + $blobSSMS) -Context $StorageContext -Force #download SSMS exe
-Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobName -Destination ($targetDir + $blobIni) -Context $StorageContext -Force #Download ini file for silent installation
+Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobSSMS -Destination ($targetDir + $blobSSMS) -Context $StorageContext -Force #download SSMS exe
+Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobIni -Destination ($targetDir + $blobIni) -Context $StorageContext -Force #Download ini file for silent installation
 
 
 Write-host "Installing SQL2017" -ForegroundColor Green
