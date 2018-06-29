@@ -25,6 +25,9 @@ $blobSSMS = "SSMS2017-Setup-ENU.exe"
 $blobSSRS = "SQLServerReportingServices2017.exe"
 $blobKey = "KeySQL2017.txt"
 $blobIni = "MyConfigurationFileSQL2017.ini"
+$SQLServerInstance = "(local)\SQL2017"
+$SSRSInstallTargetPath = "C:\Program Files\Microsoft SQL Server Reporting Services"
+
 if(!(Test-Path -Path $targetDir )){
     New-Item -ItemType directory -Path $targetDir
 }
@@ -33,7 +36,7 @@ Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobSSMS -Destinati
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobSSRS -Destination ($targetDir + $blobSSRS) -Context $StorageContext -Force #download SSRS exe
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobKey -Destination ($targetDir + $blobKey) -Context $StorageContext -Force #download SQL Server Serial Key
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobIni -Destination ($targetDir + $blobIni) -Context $StorageContext -Force #Download ini file for silent installation
-<#
+
 #Installs SQL Server locally with standard settings for Developers/Testers.
 # Install SQL from command line help - https://msdn.microsoft.com/en-us/library/ms144259.aspx
 $sw = [Diagnostics.Stopwatch]::StartNew()
@@ -57,6 +60,89 @@ Dismount-DiskImage -ImagePath $SqlServerIsoImagePath
 $sw.Stop()
 "Sql install script completed in {0:c}" -f $sw.Elapsed;
 
+##################### SSRS ############################
+
+& $targetDir$blobSSRS  /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89 /IAcceptLicenseTerms /norestart /quiet /InstallFolder=$SSRSInstallTargetPath 
+
+Start-Sleep -s 60
+rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
+
+
+function Get-ConfigSet()
+{
+	return Get-WmiObject –namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14\Admin" `
+		-class MSReportServer_ConfigurationSetting -ComputerName localhost
+}
+
+# Allow importing of sqlps module
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
+
+# Retrieve the current configuration
+$configset = Get-ConfigSet
+
+$configset
+
+If (! $configset.IsInitialized)
+{
+	# Get the ReportServer and ReportServerTempDB creation script
+	[string]$dbscript = $configset.GenerateDatabaseCreationScript("ReportServer", 1033, $false).Script
+
+	# Import the SQL Server PowerShell module
+	Import-Module sqlps -DisableNameChecking | Out-Null
+
+	# Establish a connection to the 
+	$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection 
+    $conn.ServerInstance = $SQLServerInstance
+    $conn.LoginSecure = $FALSE
+    $conn.Login = "sa"
+    $conn.Password = "Epicor123"
+    #Connect to the local, default instance of SQL Server
+    $smo = new-object Microsoft.SqlServer.Management.Smo.Server($conn)
+    
+	# Create the ReportServer and ReportServerTempDB databases
+	$db = $smo.Databases["master"]
+	$db.ExecuteNonQuery($dbscript)
+    
+	# Set permissions for the databases
+	$dbscript = $configset.GenerateDatabaseRightsScript($configset.WindowsServiceIdentityConfigured, "ReportServer", $false, $true).Script
+    #$dbscript = $configset.GenerateDatabaseRightsScript("localhost\qatools", "ReportServer", $false, $false).Script
+	$db.ExecuteNonQuery($dbscript)
+
+	# Set the database connection info
+	$configset.SetDatabaseConnection($SQLServerInstance, "ReportServer", 2, "", "")
+
+	$configset.SetVirtualDirectory("ReportServerWebService", "ReportServer", 1033)
+	$configset.ReserveURL("ReportServerWebService", "http://+:80", 1033)
+
+	# Did the name change?
+	$configset.SetVirtualDirectory("ReportServerWebApp", "Reports", 1033)
+	$configset.ReserveURL("ReportServerWebApp", "http://+:80", 1033)
+
+	$configset.InitializeReportServer($configset.InstallationID)
+
+	# Re-start services?
+	$configset.SetServiceState($false, $false, $false)
+	Restart-Service $configset.ServiceName
+	$configset.SetServiceState($true, $true, $true)
+
+	# Update the current configuration
+	$configset = Get-ConfigSet
+
+	$configset.IsReportManagerEnabled
+	$configset.IsInitialized
+	$configset.IsWebServiceEnabled
+	$configset.IsWindowsServiceEnabled
+	$configset.ListReportServersInDatabase()
+	$configset.ListReservedUrls();
+
+	$inst = Get-WmiObject –namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" `
+		-class MSReportServer_Instance -ComputerName localhost
+
+	$inst.GetReportServerUrls()
+
+}
+
+######################### SSMS #############################
 # Set file and folder path for SSMS installer .exe
 
 $filepath="$targetDir$blobSSMS"
@@ -80,4 +166,4 @@ write-host "Located the SQL SSMS Installer binaries, moving on to install..."
 $Parms = " /Install /Quiet /Norestart /Logs log.txt"
 $Prms = $Parms.Split(" ")
 & "$filepath" $Prms | Out-Null
-#>
+
