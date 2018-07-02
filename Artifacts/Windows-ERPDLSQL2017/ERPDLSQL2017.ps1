@@ -65,6 +65,33 @@ $sw.Stop()
 & $targetDir$blobSSRS  /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89 /IAcceptLicenseTerms /norestart /quiet /InstallFolder=$SSRSInstallTargetPath 
 
 Start-Sleep -s 60
+
+######################### SSMS #############################
+# Set file and folder path for SSMS installer .exe
+
+$filepath="$targetDir$blobSSMS"
+ 
+#If SSMS not present, download
+if (!(Test-Path $filepath)){
+write-host "Downloading SQL Server 2017 SSMS..."
+$URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
+$clnt = New-Object System.Net.WebClient
+$clnt.DownloadFile($url,$filepath)
+Write-Host "SSMS installer download complete" -ForegroundColor Green
+ 
+}
+else {
+ 
+write-host "Located the SQL SSMS Installer binaries, moving on to install..."
+}
+ 
+# start the SSMS installer
+#write-host "Beginning SSMS 2017 install..." -nonewline
+$Parms = " /Install /Quiet /Norestart /Logs log.txt"
+$Prms = $Parms.Split(" ")
+& "$filepath" $Prms | Out-Null
+
+##################  SSRS Configuration ##################
 rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
 
 
@@ -141,29 +168,3 @@ If (! $configset.IsInitialized)
 	$inst.GetReportServerUrls()
 
 }
-
-######################### SSMS #############################
-# Set file and folder path for SSMS installer .exe
-
-$filepath="$targetDir$blobSSMS"
- 
-#If SSMS not present, download
-if (!(Test-Path $filepath)){
-write-host "Downloading SQL Server 2017 SSMS..."
-$URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
-$clnt = New-Object System.Net.WebClient
-$clnt.DownloadFile($url,$filepath)
-Write-Host "SSMS installer download complete" -ForegroundColor Green
- 
-}
-else {
- 
-write-host "Located the SQL SSMS Installer binaries, moving on to install..."
-}
- 
-# start the SSMS installer
-#write-host "Beginning SSMS 2017 install..." -nonewline
-$Parms = " /Install /Quiet /Norestart /Logs log.txt"
-$Prms = $Parms.Split(" ")
-& "$filepath" $Prms | Out-Null
-
