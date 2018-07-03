@@ -91,10 +91,9 @@ $Parms = " /Install /Quiet /Norestart /Logs log.txt"
 $Prms = $Parms.Split(" ")
 & "$filepath" $Prms | Out-Null
 
-
+<#
 ##################  SSRS Configuration ##################
 rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
-
 
 function Get-ConfigSet()
 {
@@ -169,3 +168,4 @@ If (! $configset.IsInitialized)
 	$inst.GetReportServerUrls()
 
 }
+#>
