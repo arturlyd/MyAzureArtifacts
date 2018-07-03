@@ -91,14 +91,14 @@ $Parms = " /Install /Quiet /Norestart /Logs log.txt"
 $Prms = $Parms.Split(" ")
 & "$filepath" $Prms | Out-Null
 
-<#
+
 ##################  SSRS Configuration ##################
 rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
 
 
 function Get-ConfigSet()
 {
-	return Get-WmiObject �namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14\Admin" `
+	return Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14\Admin" `
 		-class MSReportServer_ConfigurationSetting -ComputerName localhost
 }
 
@@ -163,10 +163,9 @@ If (! $configset.IsInitialized)
 	$configset.ListReportServersInDatabase()
 	$configset.ListReservedUrls();
 
-	$inst = Get-WmiObject �namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" `
+	$inst = Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" `
 		-class MSReportServer_Instance -ComputerName localhost
 
 	$inst.GetReportServerUrls()
 
 }
-#>
