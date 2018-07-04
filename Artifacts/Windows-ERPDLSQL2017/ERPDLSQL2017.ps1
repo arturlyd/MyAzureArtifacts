@@ -34,7 +34,7 @@ if(!(Test-Path -Path $targetDir )){
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobName -Destination ($targetDir + $blobName) -Context $StorageContext -Force #download SQL Server ISO
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobSSMS -Destination ($targetDir + $blobSSMS) -Context $StorageContext -Force #download SSMS exe
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobSSRS -Destination ($targetDir + $blobSSRS) -Context $StorageContext -Force #download SSRS exe
-Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobKey -Destination ($targetDir + $blobKey) -Context $StorageContext -Force #download SQL Server Serial Key
+#Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobKey -Destination ($targetDir + $blobKey) -Context $StorageContext -Force #download SQL Server Serial Key
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobIni -Destination ($targetDir + $blobIni) -Context $StorageContext -Force #Download ini file for silent installation
 
 #Installs SQL Server locally with standard settings for Developers/Testers.
@@ -96,6 +96,20 @@ $configset
 
 If (! $configset.IsInitialized)
 {
+	
+
+	# Set the database connection info
+	$configset.SetDatabaseConnection($SQLServerInstance, "ReportServer", 2, "", "")
+
+	$configset.SetVirtualDirectory("ReportServerWebService", "ReportServer", 1033)
+	$configset.ReserveURL("ReportServerWebService", "http://+:80", 1033)
+
+	# Did the name change?
+	$configset.SetVirtualDirectory("ReportServerWebApp", "Reports", 1033)
+	$configset.ReserveURL("ReportServerWebApp", "http://+:80", 1033)
+
+	$configset.InitializeReportServer($configset.InstallationID)
+
 	# Get the ReportServer and ReportServerTempDB creation script
 	[string]$dbscript = $configset.GenerateDatabaseCreationScript("ReportServer", 1033, $false).Script
 
@@ -119,18 +133,6 @@ If (! $configset.IsInitialized)
 	$dbscript = $configset.GenerateDatabaseRightsScript($configset.WindowsServiceIdentityConfigured, "ReportServer", $false, $true).Script
     #$dbscript = $configset.GenerateDatabaseRightsScript("localhost\qatools", "ReportServer", $false, $false).Script
 	$db.ExecuteNonQuery($dbscript)
-
-	# Set the database connection info
-	$configset.SetDatabaseConnection($SQLServerInstance, "ReportServer", 2, "", "")
-
-	$configset.SetVirtualDirectory("ReportServerWebService", "ReportServer", 1033)
-	$configset.ReserveURL("ReportServerWebService", "http://+:80", 1033)
-
-	# Did the name change?
-	$configset.SetVirtualDirectory("ReportServerWebApp", "Reports", 1033)
-	$configset.ReserveURL("ReportServerWebApp", "http://+:80", 1033)
-
-	$configset.InitializeReportServer($configset.InstallationID)
 
 	# Re-start services?
 	$configset.SetServiceState($false, $false, $false)
