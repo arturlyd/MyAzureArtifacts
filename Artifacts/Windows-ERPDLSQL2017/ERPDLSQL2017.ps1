@@ -60,9 +60,6 @@ Dismount-DiskImage -ImagePath $SqlServerIsoImagePath
 $sw.Stop()
 "Sql install script completed in {0:c}" -f $sw.Elapsed;
 
-##################### Install SSRS ############################
-$Parms = "/IAcceptLicenseTerms /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89  /norestart /quiet"
-Start-Process -FilePath $targetDir$blobSSRS -ArgumentList $Parms -Wait
 ##################### Install SSMS #############################
 # Set file and folder path for SSMS installer .exe
 $filepath="$targetDir$blobSSMS"
@@ -77,6 +74,11 @@ $clnt = New-Object System.Net.WebClient
 $clnt.DownloadFile($url,$filepath)
 }
 #> 
+
+##################### Install SSRS ############################
+$Parms = "/IAcceptLicenseTerms /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89  /norestart /quiet"
+Start-Process -FilePath $targetDir$blobSSRS -ArgumentList $Parms -Wait
+<#
 ##################  SSRS Configuration ##################
 rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
 
@@ -154,4 +156,4 @@ If (! $configset.IsInitialized)
 
 	$inst.GetReportServerUrls()
 
-}
+}#>
