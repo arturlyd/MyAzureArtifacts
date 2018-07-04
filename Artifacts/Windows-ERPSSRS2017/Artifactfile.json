@@ -10,6 +10,6 @@
   "iconUri": "https://raw.githubusercontent.com/arturlyd/MyAzureArtifacts/master/Artifacts/Windows-ERPSSRS2017/ERP.ico",
   "targetOsType": "Windows",
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPDLSQL2017.ps1')]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSSRS2017.ps1')]"
   }
 }
