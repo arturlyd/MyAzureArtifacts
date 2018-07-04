@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-  "title": "ERP 10 SQL Installer ",
+  "title": "Download SQL 2016 Installer ",
   "description": "Install ERP SQL Server 2016 to VM",
   "publisher": "QA Tools",
   "tags": [

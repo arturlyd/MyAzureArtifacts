@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-  "title": "ERP Download SQL Installer ",
+  "title": "Downlad ERP 10.2.100.0",
   "description": "Downloads ERP 10.2.100.0 to VM",
   "publisher": "QA Tools",
   "tags": [
