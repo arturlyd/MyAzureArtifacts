@@ -23,10 +23,8 @@ $targetDir = 'c:\EpicorInstallers\'
 $blobName = "en_sql_server_2017_standard_x64_dvd_11294407.iso"
 $blobSSMS = "SSMS2017-Setup-ENU.exe"
 $blobSSRS = "SQLServerReportingServices2017.exe"
-$blobKey = "KeySQL2017.txt"
 $blobIni = "MyConfigurationFileSQL2017.ini"
 $SQLServerInstance = "(local)\SQL2017"
-$SSRSInstallTargetPath = "C:\Program Files\Microsoft SQL Server Reporting Services"
 
 if(!(Test-Path -Path $targetDir )){
     New-Item -ItemType directory -Path $targetDir
@@ -78,7 +76,8 @@ $clnt.DownloadFile($url,$filepath)
 ##################### Install SSRS ############################
 $Parms = "/IAcceptLicenseTerms /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89  /norestart /quiet"
 Start-Process -FilePath $targetDir$blobSSRS -ArgumentList $Parms -Wait
-<#
+
+
 ##################  SSRS Configuration ##################
 rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
 
@@ -93,16 +92,34 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 
 # Retrieve the current configuration
 $configset = Get-ConfigSet
-
+$DBCreationAttempt = 3
 $configset
-
 If (! $configset.IsInitialized)
 {
-	
-
+            
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
+	# Get the ReportServer and ReportServerTempDB creation script
+	[string]$dbscript = $configset.GenerateDatabaseCreationScript("ReportServer", 1033, $false).Script
+	# Establish a connection to the 
+	$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection 
+    #$conn = New-Object system.Data.SqlClient.SqlConnection
+    $conn.ServerInstance = $SQLServerInstance
+    $conn.LoginSecure = $FALSE
+    $conn.Login = "sa"
+    $conn.Password = "Epicor123"
+    #Connect to the local, default instance of SQL Server
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
+    $smo = new-object Microsoft.SqlServer.Management.Smo.Server($conn)
+	# Create the ReportServer and ReportServerTempDB databases
+	$db = $smo.Databases["master"]
+	$db.ExecuteNonQuery($dbscript)
+	# Set permissions for the databases
+	$dbscript = $configset.GenerateDatabaseRightsScript($configset.WindowsServiceIdentityConfigured, "ReportServer", $false, $true).Script
+    #$dbscript = $configset.GenerateDatabaseRightsScript("localhost\qatools", "ReportServer", $false, $false).Script
+	$db.ExecuteNonQuery($dbscript)
+    
 	# Set the database connection info
 	$configset.SetDatabaseConnection($SQLServerInstance, "ReportServer", 2, "", "")
-
 	$configset.SetVirtualDirectory("ReportServerWebService", "ReportServer", 1033)
 	$configset.ReserveURL("ReportServerWebService", "http://+:80", 1033)
 
@@ -112,29 +129,9 @@ If (! $configset.IsInitialized)
 
 	$configset.InitializeReportServer($configset.InstallationID)
 
-	# Get the ReportServer and ReportServerTempDB creation script
-	[string]$dbscript = $configset.GenerateDatabaseCreationScript("ReportServer", 1033, $false).Script
 
 	# Import the SQL Server PowerShell module
 	Import-Module sqlps -DisableNameChecking | Out-Null
-
-	# Establish a connection to the 
-	$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection 
-    $conn.ServerInstance = $SQLServerInstance
-    $conn.LoginSecure = $FALSE
-    $conn.Login = "sa"
-    $conn.Password = "Epicor123"
-    #Connect to the local, default instance of SQL Server
-    $smo = new-object Microsoft.SqlServer.Management.Smo.Server($conn)
-    
-	# Create the ReportServer and ReportServerTempDB databases
-	$db = $smo.Databases["master"]
-	$db.ExecuteNonQuery($dbscript)
-    
-	# Set permissions for the databases
-	$dbscript = $configset.GenerateDatabaseRightsScript($configset.WindowsServiceIdentityConfigured, "ReportServer", $false, $true).Script
-    #$dbscript = $configset.GenerateDatabaseRightsScript("localhost\qatools", "ReportServer", $false, $false).Script
-	$db.ExecuteNonQuery($dbscript)
 
 	# Re-start services?
 	$configset.SetServiceState($false, $false, $false)
@@ -151,9 +148,8 @@ If (! $configset.IsInitialized)
 	$configset.ListReportServersInDatabase()
 	$configset.ListReservedUrls();
 
-	$inst = Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" `
-		-class MSReportServer_Instance -ComputerName localhost
+	$inst = Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" -class MSReportServer_Instance -ComputerName localhost
 
 	$inst.GetReportServerUrls()
 
-}#>
+}
