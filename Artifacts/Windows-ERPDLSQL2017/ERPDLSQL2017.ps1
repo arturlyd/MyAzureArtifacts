@@ -92,7 +92,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 
 # Retrieve the current configuration
 $configset = Get-ConfigSet
-$DBCreationAttempt = 3
+
 $configset
 If (! $configset.IsInitialized)
 {
