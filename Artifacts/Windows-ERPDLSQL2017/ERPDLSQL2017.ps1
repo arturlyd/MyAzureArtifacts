@@ -96,8 +96,8 @@ $configset = Get-ConfigSet
 $configset
 If (! $configset.IsInitialized)
 {
-    Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo       
-    #[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
+    #Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo       
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
 	# Get the ReportServer and ReportServerTempDB creation script
 	[string]$dbscript = $configset.GenerateDatabaseCreationScript("ReportServer", 1033, $false).Script
 	# Establish a connection to the 
@@ -108,8 +108,8 @@ If (! $configset.IsInitialized)
     $conn.Login = "sa"
     $conn.Password = "Epicor123"
 	#Connect to the local, default instance of SQL Server
-	Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo  
-    #[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
+	#Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo  
+    [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
     $smo = new-object Microsoft.SqlServer.Management.Smo.Server($conn)
 	# Create the ReportServer and ReportServerTempDB databases
 	$db = $smo.Databases["master"]
