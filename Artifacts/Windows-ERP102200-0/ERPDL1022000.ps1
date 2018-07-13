@@ -58,9 +58,9 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
 ############# Install Chocolatey ###################
 LogWrite ("############# Install Chocolatey ###################")
 try{
-    Set-ExecutionPolicy Bypass -Scope Process -Force
-    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) 
-    choco feature enable -n allowGlobalConfirmation 
+    Set-ExecutionPolicy Bypass -Scope Process -Force
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) 
+    choco feature enable -n allowGlobalConfirmation 
 }
 catch
 {
