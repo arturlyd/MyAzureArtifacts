@@ -57,16 +57,34 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
 
 ############# Install Chocolatey ###################
 LogWrite ("############# Install Chocolatey ###################")
-Set-ExecutionPolicyÂ BypassÂ -ScopeÂ ProcessÂ -Force
-Invoke-ExpressionÂ ((New-ObjectÂ System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) 
-choco feature enableÂ -n allowGlobalConfirmation 
-
+try{
+    Set-ExecutionPolicy Bypass -Scope Process -Force
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) 
+    choco feature enable -n allowGlobalConfirmation 
+}
+catch
+{
+    $e = $_.Exception
+    $line = $_.InvocationInfo.ScriptLineNumber
+    $msg = $e.Message 
+    LogWrite("There was an error:  $msg $e at $line")
+    break
+}
 ############# Import PS Modules ###################
 LogWrite ("############# Import PS Modules ###################")
-choco upgrade epicorpserp -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" `
-                          -p "ilxf6um6qfqk7ikel5jipldvvfndjmzny63f3cl72b7exnpqt2hq" --force
-Import-Module Epicor.Ps.Erp -DisableNameChecking
-
+try{
+    choco upgrade epicorpserp -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" `
+                            -p "ilxf6um6qfqk7ikel5jipldvvfndjmzny63f3cl72b7exnpqt2hq" --force
+    Import-Module Epicor.Ps.Erp -DisableNameChecking
+}
+catch
+{
+    $e = $_.Exception
+    $line = $_.InvocationInfo.ScriptLineNumber
+    $msg = $e.Message 
+    LogWrite("There was an error:  $msg $e at $line")
+    break
+}
 ######### Remove default Azure certificate and create a new one ################
 LogWrite ("######### Remove default Azure certificate and create a new one ################")
 try{
