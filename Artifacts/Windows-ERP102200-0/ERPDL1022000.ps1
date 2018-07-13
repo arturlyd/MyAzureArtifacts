@@ -83,6 +83,7 @@ catch
     LogWrite("There was an error:  $msg $e at $line")
     break
 }
+<#
 ######### Remove default Azure certificate and create a new one ################
 LogWrite ("######### Remove default Azure certificate and create a new one ################")
 try{
@@ -120,12 +121,13 @@ catch
 LogWrite ("############ Restore Demo database ###############")
 try{
     $targetDBName = $appServerName
-    $sqlBackupLocation = "$targetDir$dbBackup"
-    if(!(Test-Path -Path $sqlBackupLocation )){
-        throw ("DB Backup path not found: " + $sqlBackupLocation)
-    }
+    
     if(!(Test-Path -Path $sqlFilesLoc )){
         New-Item -ItemType directory -Path $sqlFilesLoc
+    }
+    $sqlBackupLocation = "$targetDir$dbBackup"
+    if(!(Test-Path -Path $targetDir )){
+        throw ("DB Backup path not found: " + $targetDir)
     }
     Get-AzureStorageBlobContent -Container $ContainerName -Blob $dbBackup -Destination $sqlBackupLocation -Context $StorageContext -Force
     $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
@@ -192,7 +194,7 @@ Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath "C:\temp"
 ############## Launch Conversion Runner ######################
 #LogWrite ("############## Launch Conversion Runner ######################")
 #Start-ConversionRunner -E10Version $erpVersion$erpPatch -EpicorSmartClientFolder ($erpInstallPatch + "LocalClients\" + $appserverName) -LogFilesPath "C:\temp" -SysConfigFilePath ($erpInstallPatch + "LocalClients\" + $appserverName + "\Config\" + $appserverName +".sysconfig") -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
-
+#>
 
 
 
