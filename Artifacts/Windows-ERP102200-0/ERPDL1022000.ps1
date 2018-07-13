@@ -83,7 +83,7 @@ catch
     LogWrite("There was an error:  $msg $e at $line")
     break
 }
-<#
+
 ######### Remove default Azure certificate and create a new one ################
 LogWrite ("######### Remove default Azure certificate and create a new one ################")
 try{
@@ -194,7 +194,7 @@ Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath "C:\temp"
 ############## Launch Conversion Runner ######################
 #LogWrite ("############## Launch Conversion Runner ######################")
 #Start-ConversionRunner -E10Version $erpVersion$erpPatch -EpicorSmartClientFolder ($erpInstallPatch + "LocalClients\" + $appserverName) -LogFilesPath "C:\temp" -SysConfigFilePath ($erpInstallPatch + "LocalClients\" + $appserverName + "\Config\" + $appserverName +".sysconfig") -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
-#>
+
 
 
 
