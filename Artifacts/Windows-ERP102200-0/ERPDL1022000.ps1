@@ -26,7 +26,6 @@ $targetSqlPassword = "Epicor123"
 $defaultWebSiteName = "Default Web Site"
 $computerName = $env:ComputerName
 $Logfile = ($targetDir + "ERPDL1022000.log")
-$iceVersion = "3.2.200"
 $erpVersion = "10.2.200"
 $erpPatch = ".0"
 $epicorGSM = "epicor"
@@ -41,7 +40,6 @@ $ssrsDBName = "SSRS"
 $ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer"
 $ssrsBaseURL = "http://$env:ComputerName/ReportServer"
 $licenseID = "115506.lic"
-$setupEnvironmentDirectory = "C:\Program Files (x86)\Common Files\Epicor Software\Application Server Manager Extensions\$iceVersion\SetUpEnvironment"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
 
@@ -100,7 +98,7 @@ try{
     $erpCert = New-SelfSignedCertificate -FriendlyName $computerName -DnsName $computerName -CertStoreLocation "cert:\LocalMachine\My"
     Export-Certificate -Cert $erpCert -FilePath ($targetDir + $computerName + ".cer")
     $certFile = ( Get-ChildItem -Path ($targetDir + $computerName + ".cer"))
-    $certFile | Import-Certificate -CertStoreLocation cert:\LocalMachine\Root        
+    $certFile | Import-Certificate -CertStoreLocation cert:\LocalMachine\Root
     #Add HTTPS binding to IIS 
     LogWrite ("Adds HTTPs binding to defatul website and sets certificate")
     if($null -eq (Get-WebBinding -Name $defaultWebSiteName -Port 443 -Protocol "https")){
@@ -123,6 +121,12 @@ LogWrite ("############ Restore Demo database ###############")
 try{
     $targetDBName = $appServerName
     $sqlBackupLocation = "$targetDir$dbBackup"
+    if(!(Test-Path -Path $sqlBackupLocation )){
+        throw ("DB Backup path not found: " + $sqlBackupLocation)
+    }
+    if(!(Test-Path -Path $sqlFilesLoc )){
+        New-Item -ItemType directory -Path $sqlFilesLoc
+    }
     Get-AzureStorageBlobContent -Container $ContainerName -Blob $dbBackup -Destination $sqlBackupLocation -Context $StorageContext -Force
     $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
     $sqlConnection.ConnectionString = Get-Connection-String $sqlInstance "master" $False $targetSqlUser (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force)
