@@ -46,7 +46,6 @@ $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 ############# GET Latest 200 update ##############
 Function LogWrite ([string]$logstring)
 {
-    
     Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
 }
 Remove-Item $Logfile -ErrorAction SilentlyContinue
