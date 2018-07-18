@@ -42,11 +42,11 @@ $ssrsBaseURL = "http://$env:ComputerName/ReportServer"
 $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
-$password = ConvertTo-SecureString $targetSqlPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential("qatools", $password)
+$password = ConvertTo-SecureString $targetSqlPassword -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential("qatools", $password)
 $imports = '#data#'
 . ([ScriptBlock]::Create($imports))
-Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $imports -ScriptBlock 
+Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $imports -ScriptBlock 
 {
     function LogError {
         $exceptionObject = $_.Exception
