@@ -43,7 +43,6 @@ $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
 
-############# GET Latest 200 update ##############
 function LogError {
     $exceptionObject = $_.Exception
     $exceptionData = "$($exceptionObject.Message)"
@@ -151,6 +150,7 @@ catch{
     LogError
     break
 }
+<#
 ############ Deploy Appserver + Reports ###############
 LogWrite ("############ Deploy Appserver + Reports ###############")
 write-host "############ Deploy Appserver + Reports ###############" -ForegroundColor Green
@@ -179,4 +179,4 @@ catch{
 
 
 
-
+#>
