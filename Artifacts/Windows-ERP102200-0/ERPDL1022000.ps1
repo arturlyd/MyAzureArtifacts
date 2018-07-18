@@ -33,8 +33,8 @@ $epicorPass = "epicor"
 $apppoolUserName = "$env:ComputerName\$env:USERNAME"
 $erpBinding = "HttpsBinaryUsernameChannel"
 $appServerName = "ERP102200"
-$sqlDataSource = [System.Data.Sql.SqlDataSourceEnumerator]::Instance.GetDataSources() | Select-Object @{Name="ServerName";Expression={$_.ServerName}},@{Name="InstanceName";Expression={$_.InstanceName}};
-$sqlInstance = $sqlDataSource.ServerName + "\" + $sqlDataSource.InstanceName
+$sqlDataSource = [System.Data.Sql.SqlDataSourceEnumerator]::Instance.GetDataSources()|?{$_.ServerName -eq $env:COMPUTERNAME}
+$sqlInstance = $sqlDataSource.ServerName + "\" +  $sqlDataSource.InstanceName
 $sqlFilesLoc = "c:\SQLFiles\"
 $ssrsDBName = "SSRS"
 $ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer"
@@ -44,6 +44,14 @@ $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
 
 ############# GET Latest 200 update ##############
+function LogError {
+    $exceptionObject = $_.Exception
+    $exceptionData = "$($exceptionObject.Message)"
+    $invokationInfo = $_.InvocationInfo
+    $invokationData = "@ $($invokationInfo.PositionMessage) `r`n FullLine $($invokationInfo.Line)"
+    $formattedError = "$($exceptionData) `r`n $($invokationData)" 
+    LogWrite("There was an error: $formattedError") 
+}
 Function LogWrite ([string]$logstring)
 {
     Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
@@ -54,21 +62,21 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
 
 ############# Install Chocolatey ###################
 LogWrite ("############# Install Chocolatey ###################")
+write-host "############# Install Chocolatey ###################" -ForegroundColor Green
 try{
     Set-ExecutionPolicy Bypass -Scope Process -Force
-    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) 
-    choco feature enable -n allowGlobalConfirmation 
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    choco feature enable -n allowGlobalConfirmation
 }
 catch
 {
-    $e = $_.Exception
-    $line = $_.InvocationInfo.ScriptLineNumber
-    $msg = $e.Message 
-    LogWrite("There was an error:  $msg $e at $line")
+    LogError
     break
 }
 ############# Import PS Modules ###################
+#modules must be installed in one of these paths: [System.Environment]::GetEnvironmentVariable("PSModulePath") 
 LogWrite ("############# Import PS Modules ###################")
+write-host "############# Import PS Modules ###################" -ForegroundColor Green
 try{
     choco upgrade epicorpserp -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" `
                             -p "ilxf6um6qfqk7ikel5jipldvvfndjmzny63f3cl72b7exnpqt2hq" --force
@@ -76,15 +84,14 @@ try{
 }
 catch
 {
-    $e = $_.Exception
-    $line = $_.InvocationInfo.ScriptLineNumber
-    $msg = $e.Message 
-    LogWrite("There was an error:  $msg $e at $line")
+    LogError
     break
 }
 
 ######### Remove default Azure certificate and create a new one ################
 LogWrite ("######### Remove default Azure certificate and create a new one ################")
+#https://blogs.technet.microsoft.com/vishalagarwal/2009/08/21/generating-a-certificate-self-signed-using-powershell-and-certenroll-interfaces/
+write-host "######### Remove default Azure certificate and create a new one ################" -ForegroundColor Green
 try{
     LogWrite ("Remove default Certificate")
     $Store = New-Object Security.Cryptography.X509Certificates.X509Store(
@@ -109,15 +116,13 @@ try{
 }
 catch
 {
-    $e = $_.Exception
-    $line = $_.InvocationInfo.ScriptLineNumber
-    $msg = $e.Message 
-    LogWrite("There was an error:  $msg $e at $line")
+    LogError
     break
 }
 
 ############ Restore Demo database ###############
 LogWrite ("############ Restore Demo database ###############")
+write-host "############ Restore Demo database ###############" -ForegroundColor Green
 try{
     $targetDBName = $appServerName
     
@@ -129,66 +134,44 @@ try{
         throw ("DB Backup path not found: " + $targetDir)
     }
     Get-AzureStorageBlobContent -Container $ContainerName -Blob $dbBackup -Destination $sqlBackupLocation -Context $StorageContext -Force
-    $sqlConnection = New-Object System.Data.SqlClient.SqlConnection
-    $sqlConnection.ConnectionString = Get-Connection-String $sqlInstance "master" $False $targetSqlUser (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force)
-    $sqlConnection.Open()
-    $sqlCommand = New-Object System.Data.SqlClient.SqlCommand("RESTORE FILELISTONLY FROM  DISK = N'$sqlBackupLocation' WITH  NOUNLOAD,  FILE = 1", $sqlConnection)
-    $sqlCommand.CommandTimeout = 1000000
-    $mdfName = ""
-    $mdfFileName = ""
-    $ldfName = ""
-    $ldfFileName = ""
-    $reader = $sqlCommand.ExecuteReader()
-    while ($reader.Read()) {
-        $dataFileType = $reader.GetString(2)
-        if ($dataFileType -eq "D") {
-            $mdfName = $reader.GetString(0)
-            $mdfFileName = "$sqlFilesLoc$targetDBName.mdf"
-        }
-        else {
-            $ldfName = $reader.GetString(0)
-            $ldfFileName = "$sqlFilesLoc$targetDBName.ldf"
-        }
-    }
-    $reader.Close()
-    $sqlCommand.CommandText = "
-    RESTORE DATABASE [$targetDBName] FROM  DISK = N'$sqlBackupLocation' WITH  FILE = 1,
-    MOVE N'$mdfName' TO N'$mdfFileName', 
-    MOVE N'$ldfName' TO N'$ldfFileName',  NOUNLOAD,  REPLACE,  STATS = 5
-    ALTER DATABASE [$targetDBName] SET MULTI_USER
-    "
-    $sqlCommand.ExecuteNonQuery()
-    if ($null -ne $sqlCommand -and $sqlCommand -is [System.IDisposable]) {
-        $sqlCommand.Dispose()
-    }
+    Restore-DatabaseBackup -MdfFileLocation $sqlFilesLoc -LdfFileLocation $sqlFilesLoc -BackupLocation $targetDir$dbBackup -RestoredDBName $targetDBName -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser  -TargetSqlPassword (ConvertTo-SecureString $targetSqlPassword -AsPlainText -Force) -TargetSqlAuthenticationIsIntegratedSecurity $false
 }
 catch{
-    $e = $_.Exception
-    $line = $_.InvocationInfo.ScriptLineNumber
-    $msg = $e.Message 
-    LogWrite("There was an error:  $msg $e at $line")
+    LogError
     break
 }
 
 ############ Downloads ISO and installs ERP ###############
 LogWrite ("############ Downloads ISO and installs ERP ###############")
+write-host "############ Downloads ISO and installs ERP ###############" -ForegroundColor Green
 try{
     Install-Erp -E10Version $erpVersion$erpPatch -installMediaDirectory $targetDir -e10MediaBlobUri "https://aqatoolslab2420.blob.core.windows.net/" -blobContainerName $containerName -e10MediaSAS $blobSas
 }
 catch{
-    $e = $_.Exception
-    $line = $_.InvocationInfo.ScriptLineNumber
-    $msg = $e.Message 
-    LogWrite("There was an error:  $msg $e at $line")
+    LogError
+    break
 }
 ############ Deploy Appserver + Reports ###############
 LogWrite ("############ Deploy Appserver + Reports ###############")
-Install-ErpAppserver -E10Version $erpVersion$erpPatch -LogFilesPath "C:\temp" -AppserverName $appserverName -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -UseApppoolIdentity $true -ApplicationPoolUserName $apppoolUserName -ApplicationPoolUserPassword (ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force) -EpicorDatabaseName $appserverName -HttpsBinding $erpBinding -DNSIdentity $erpCert -ServerName $env:ComputerName -CreateSsrsDatabase $true -ConfigureSsrsReports $true -SsrsDatabaseName $ssrsDBName -SsrsInstallLocation $ssrsServerInstallPath -SSRSBaseUrl $ssrsBaseURL -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -CheckForBugFixes
+write-host "############ Deploy Appserver + Reports ###############" -ForegroundColor Green
+try{
+    Install-ErpAppserver -E10Version $erpVersion$erpPatch -LogFilesPath "C:\temp" -AppserverName $appserverName -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -UseApppoolIdentity $true -ApplicationPoolUserName $apppoolUserName -ApplicationPoolUserPassword (ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force) -EpicorDatabaseName $appserverName -HttpsBinding $erpBinding -DNSIdentity $erpCert -ServerName $env:ComputerName -CreateSsrsDatabase $true -ConfigureSsrsReports $true -SsrsDatabaseName $ssrsDBName -SsrsInstallLocation $ssrsServerInstallPath -SSRSBaseUrl $ssrsBaseURL -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -CheckForBugFixes
+}
+catch{
+    LogError
+    break
+}
 
 ################# Install License #####################
 LogWrite ("################# Install License #####################")
-Get-AzureStorageBlobContent -Container $licContainerName -Blob $licenseID -Destination ($targetDir + $licenseID) -Context $StorageContext -Force
-Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath "C:\temp" -E10Version $erpVersion$erpPatch -AppserverUri ("https://" + $env:ComputerName + "/" + $appserverName) -ErpUserName $epicorGSM -ErpUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -EndpointBinding $erpBinding -ErpDatabaseName $targetDBName -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlAuthenticationIsIntegratedSecurity $false -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -ReplaceExistingLicense
+try{
+    Get-AzureStorageBlobContent -Container $licContainerName -Blob $licenseID -Destination ($targetDir + $licenseID) -Context $StorageContext -Force
+    Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath "C:\temp" -E10Version $erpVersion$erpPatch -AppserverUri ("https://" + $env:ComputerName + "/" + $appserverName) -ErpUserName $epicorGSM -ErpUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -EndpointBinding $erpBinding -ErpDatabaseName $targetDBName -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlAuthenticationIsIntegratedSecurity $false -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -ReplaceExistingLicense
+}
+catch{
+    LogError
+    break
+}
 
 ############## Launch Conversion Runner ######################
 #LogWrite ("############## Launch Conversion Runner ######################")
