@@ -18,7 +18,7 @@
 
 ##################################################
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential("qatools", $password)
+$credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
 $imports = '#data#'
 
 . ([ScriptBlock]::Create($imports))
@@ -96,7 +96,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-
+    <#
     ######### Remove default Azure certificate and create a new one ################
     LogWrite ("######### Remove default Azure certificate and create a new one ################")
     #https://blogs.technet.microsoft.com/vishalagarwal/2009/08/21/generating-a-certificate-self-signed-using-powershell-and-certenroll-interfaces/
@@ -149,7 +149,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-
+    #>
     ############ Downloads ISO and installs ERP ###############
     LogWrite ("############ Downloads ISO and installs ERP ###############")
     write-host "############ Downloads ISO and installs ERP ###############" -ForegroundColor Green
@@ -160,6 +160,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
+    <#
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
     write-host "############ Deploy Appserver + Reports ###############" -ForegroundColor Green
@@ -170,7 +171,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    <#
+    
     ################# Install License #####################
     LogWrite ("################# Install License #####################")
     try{
