@@ -71,7 +71,6 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
 
     ############# Install Chocolatey ###################
     LogWrite ("############# Install Chocolatey ###################")
-    write-host "############# Install Chocolatey ###################" -ForegroundColor Green
     try{
         Set-ExecutionPolicy Bypass -Scope Process -Force
         Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
@@ -85,7 +84,6 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     ############# Import PS Modules ###################
     #modules must be installed in one of these paths: [System.Environment]::GetEnvironmentVariable("PSModulePath") 
     LogWrite ("############# Import PS Modules ###################")
-    write-host "############# Import PS Modules ###################" -ForegroundColor Green
     try{
         choco upgrade epicorpserp -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" `
                                 -p "ilxf6um6qfqk7ikel5jipldvvfndjmzny63f3cl72b7exnpqt2hq" --force
@@ -152,7 +150,6 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     #>
     ############ Downloads ISO and installs ERP ###############
     LogWrite ("############ Downloads ISO and installs ERP ###############")
-    write-host "############ Downloads ISO and installs ERP ###############" -ForegroundColor Green
     try{
         Install-Erp -E10Version $erpVersion$erpPatch -installMediaDirectory $targetDir -e10MediaBlobUri "https://aqatoolslab2420.blob.core.windows.net/" -blobContainerName $containerName -e10MediaSAS $blobSas
     }
