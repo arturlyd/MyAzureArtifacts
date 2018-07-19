@@ -94,7 +94,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    
+    <#
     ######### Remove default Azure certificate and create a new one ################
     LogWrite ("######### Remove default Azure certificate and create a new one ################")
     #https://blogs.technet.microsoft.com/vishalagarwal/2009/08/21/generating-a-certificate-self-signed-using-powershell-and-certenroll-interfaces/
@@ -157,7 +157,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    <#
+    
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
     write-host "############ Deploy Appserver + Reports ###############" -ForegroundColor Green
