@@ -148,7 +148,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    <#
+    
     ############ Downloads ISO and installs ERP ###############
     LogWrite ("############ Downloads ISO and installs ERP ###############")
     try{
@@ -158,7 +158,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    
+    <#
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
     write-host "############ Deploy Appserver + Reports ###############" -ForegroundColor Green
