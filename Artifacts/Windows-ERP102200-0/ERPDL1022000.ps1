@@ -17,12 +17,12 @@
 
 
 ##################################################
-$password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential("qatools", $password)
+$password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential("qatools", $password)
 $imports = '#data#'
 
 . ([ScriptBlock]::Create($imports))
-Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $imports -ScriptBlock{
+Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $imports -ScriptBlock{
 
 $StorageAccountName = "aqatoolslab2420"
 $blobSas = "sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2027-06-06T05:11:13Z&st=2018-06-05T21:11:13Z&spr=https,http&sig=vdilQIbevC02X6gu8d%2FQt25%2BUClG7FCRrchlogcFI2Q%3D"
