@@ -52,9 +52,9 @@ $ssrsBaseURL = "http://$env:ComputerName/ReportServer"
 $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
-
-
-
+if(!(Test-Path -Path $targetDir )){
+    New-Item -ItemType directory -Path $targetDir
+}
 function LogError {
     $exceptionObject = $_.Exception
     $exceptionData = "$($exceptionObject.Message)"
