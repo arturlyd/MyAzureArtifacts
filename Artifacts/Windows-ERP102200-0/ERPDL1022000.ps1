@@ -14,6 +14,16 @@
 
 
 ##################################################################################################>
+
+
+##################################################
+$password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential("qatools", $password)
+$imports = '#data#'
+
+. ([ScriptBlock]::Create($imports))
+Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $imports -ScriptBlock{
+
 $StorageAccountName = "aqatoolslab2420"
 $blobSas = "sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2027-06-06T05:11:13Z&st=2018-06-05T21:11:13Z&spr=https,http&sig=vdilQIbevC02X6gu8d%2FQt25%2BUClG7FCRrchlogcFI2Q%3D"
 $storageContext = New-AzureStorageContext $StorageAccountName -SasToken ("?"+$blobSas)
@@ -42,27 +52,22 @@ $ssrsBaseURL = "http://$env:ComputerName/ReportServer"
 $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
-$password = ConvertTo-SecureString $targetSqlPassword -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential("qatools", $password)
-$imports = '#data#'
-. ([ScriptBlock]::Create($imports))
-Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $imports -ScriptBlock 
-{
-    function LogError {
-        $exceptionObject = $_.Exception
-        $exceptionData = "$($exceptionObject.Message)"
-        $invokationInfo = $_.InvocationInfo
-        $invokationData = "@ $($invokationInfo.PositionMessage) `r`n FullLine $($invokationInfo.Line)"
-        $formattedError = "$($exceptionData) `r`n $($invokationData)" 
-        LogWrite("There was an error: $formattedError") 
-    }
-    Function LogWrite ([string]$logstring)
-    {
-        Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
-    }
-    Remove-Item $Logfile -ErrorAction SilentlyContinue
-    ##################################################
 
+
+
+function LogError {
+    $exceptionObject = $_.Exception
+    $exceptionData = "$($exceptionObject.Message)"
+    $invokationInfo = $_.InvocationInfo
+    $invokationData = "@ $($invokationInfo.PositionMessage) `r`n FullLine $($invokationInfo.Line)"
+    $formattedError = "$($exceptionData) `r`n $($invokationData)" 
+    LogWrite("There was an error: $formattedError") 
+}
+Function LogWrite ([string]$logstring)
+{
+    Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
+}
+Remove-Item $Logfile -ErrorAction SilentlyContinue
 
     ############# Install Chocolatey ###################
     LogWrite ("############# Install Chocolatey ###################")
@@ -155,7 +160,6 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
         LogError
         break
     }
-    <#
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
     write-host "############ Deploy Appserver + Reports ###############" -ForegroundColor Green
@@ -166,7 +170,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
         LogError
         break
     }
-
+    <#
     ################# Install License #####################
     LogWrite ("################# Install License #####################")
     try{
