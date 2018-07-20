@@ -19,10 +19,9 @@
 ###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
-$imports = '#data#'
 
 . ([ScriptBlock]::Create($imports))
-Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $imports -ScriptBlock{
+Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
     #Make sure the installers directory exists so subsequent scripts can access the location without issues
     $targetDir = "c:\EpicorInstallers\"
     $Logfile = ($targetDir + "ERPW16Roles.log")
@@ -73,7 +72,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
     #Set-Service -Name "WSearch" -StartupType "Auto"
     LogWrite ("############# Installing ERP prerequisites ###################")
     try{
-        Install-ErpPrerequisites
+        Install-ErpPrerequisitesForWindowsServer 
     }
     catch
     {
