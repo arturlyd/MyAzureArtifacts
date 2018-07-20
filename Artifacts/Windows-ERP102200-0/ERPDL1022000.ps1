@@ -3,14 +3,14 @@
     Description
     ===========
 
-	- This script does the following - 
+	- This script does the following -
         - Installs PS.ERP/Core modules for Choco instructions
 		- Downloads ERP 10.2.200.0 and its demo database
         - Creates Certificate
         - Creates a new appserver
         - Install license
         - Runs Conversions
-           
+
 
 
 ##################################################################################################>
@@ -43,7 +43,7 @@ $epicorPass = "epicor"
 $apppoolUserName = "$env:ComputerName\$env:USERNAME"
 $erpBinding = "HttpsBinaryUsernameChannel"
 $appServerName = "ERP102200"
-$sqlDataSource = [System.Data.Sql.SqlDataSourceEnumerator]::Instance.GetDataSources()|?{$_.ServerName -eq $env:COMPUTERNAME}
+$sqlDataSource = [System.Data.Sql.SqlDataSourceEnumerator]::Instance.GetDataSources()|Where-Object{$_.ServerName -eq $env:COMPUTERNAME}
 $sqlInstance = $sqlDataSource.ServerName + "\" +  $sqlDataSource.InstanceName
 $sqlFilesLoc = "c:\SQLFiles\"
 $ssrsDBName = "SSRS"
@@ -60,8 +60,8 @@ function LogError {
     $exceptionData = "$($exceptionObject.Message)"
     $invokationInfo = $_.InvocationInfo
     $invokationData = "@ $($invokationInfo.PositionMessage) `r`n FullLine $($invokationInfo.Line)"
-    $formattedError = "$($exceptionData) `r`n $($invokationData)" 
-    LogWrite("There was an error: $formattedError") 
+    $formattedError = "$($exceptionData) `r`n $($invokationData)"
+    LogWrite("There was an error: $formattedError")
 }
 Function LogWrite ([string]$logstring)
 {
@@ -82,7 +82,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         break
     }
     ############# Import PS Modules ###################
-    #modules must be installed in one of these paths: [System.Environment]::GetEnvironmentVariable("PSModulePath") 
+    #modules must be installed in one of these paths: [System.Environment]::GetEnvironmentVariable("PSModulePath")
     LogWrite ("############# Import PS Modules ###################")
     try{
         choco upgrade epicorpserp -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" `
@@ -94,7 +94,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    <#
+    
     ######### Remove default Azure certificate and create a new one ################
     LogWrite ("######### Remove default Azure certificate and create a new one ################")
     #https://blogs.technet.microsoft.com/vishalagarwal/2009/08/21/generating-a-certificate-self-signed-using-powershell-and-certenroll-interfaces/
@@ -107,13 +107,13 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         $Store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
         $Store.Certificates |
         ForEach-Object { $Store.Remove($_) }
-        
+
         LogWrite ("Creates new Certificate")
         $erpCert = New-SelfSignedCertificate -FriendlyName $computerName -DnsName $computerName -CertStoreLocation "cert:\LocalMachine\My"
         Export-Certificate -Cert $erpCert -FilePath ($targetDir + $computerName + ".cer")
         $certFile = ( Get-ChildItem -Path ($targetDir + $computerName + ".cer"))
         $certFile | Import-Certificate -CertStoreLocation cert:\LocalMachine\Root
-        #Add HTTPS binding to IIS 
+        #Add HTTPS binding to IIS
         LogWrite ("Adds HTTPs binding to defatul website and sets certificate")
         if($null -eq (Get-WebBinding -Name $defaultWebSiteName -Port 443 -Protocol "https")){
             New-WebBinding -Name $defaultWebSiteName -IP "*" -Port 443 -Protocol https
@@ -147,7 +147,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    #>
+    
     ############ Downloads ISO and installs ERP ###############
     LogWrite ("############ Downloads ISO and installs ERP ###############")
     try{
@@ -167,7 +167,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    
+
     ################# Install License #####################
     LogWrite ("################# Install License #####################")
     try{
