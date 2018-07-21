@@ -18,7 +18,8 @@
 # Always Run As Administrator
 ###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential($env:USERDOMAIN + "\" + $env:USERNAME, $password)
+$username = $env:USERNAME
+$credential = New-Object System.Management.Automation.PSCredential($env:USERDOMAIN + "\" + $username, $password)
 
 . ([ScriptBlock]::Create($imports))
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{

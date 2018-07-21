@@ -16,9 +16,9 @@
 ##################################################################################################>
 
 
-###################################################
+##################################################
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential($env:USERDOMAIN + "\" + $env:USERNAME, $password)
+$credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
 
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
 
