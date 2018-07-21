@@ -18,7 +18,7 @@
 # Always Run As Administrator
 ###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
+$credential = New-Object System.Management.Automation.PSCredential($env:USERDOMAIN + "\" +$env:USERNAME, $password)
 
 . ([ScriptBlock]::Create($imports))
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
@@ -41,7 +41,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBl
         Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
     }
     Remove-Item $Logfile -ErrorAction SilentlyContinue
-    LogWrite ("Prueba para ver que dominio y usuario pone" + $env:USERDOMAIN + "\" +$env:USERNAME)
+    LogWrite ("Prueba para ver que dominio y usuario pone " + $env:USERDOMAIN + "\" +$env:USERNAME)
     ############# Install Chocolatey ###################
     LogWrite ("############# Install Chocolatey ###################")
     try{
