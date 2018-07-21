@@ -18,11 +18,11 @@
 # Always Run As Administrator
 ###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential($env:USERDOMAIN + "\" +$env:USERNAME, $password)
+$credential = New-Object System.Management.Automation.PSCredential($env:USERDOMAIN + "\" + $env:USERNAME, $password)
 
 . ([ScriptBlock]::Create($imports))
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
-    #Make sure the installers directory exists so subsequent scripts can access the location without issues
+    #Make sure the installers directory exists so subsequent scripts can access the location without issues.
     $targetDir = "c:\EpicorInstallers\"
     $Logfile = ($targetDir + "ERPW16Roles.log")
     if(!(Test-Path -Path $targetDir )){
