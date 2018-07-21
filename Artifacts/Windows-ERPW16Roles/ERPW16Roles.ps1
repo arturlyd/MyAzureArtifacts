@@ -41,6 +41,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBl
         Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
     }
     Remove-Item $Logfile -ErrorAction SilentlyContinue
+    LogWrite ("Prueba para ver que dominio y usuario pone" + $env:USERDOMAIN + "\" +$env:USERNAME)
     ############# Install Chocolatey ###################
     LogWrite ("############# Install Chocolatey ###################")
     try{
