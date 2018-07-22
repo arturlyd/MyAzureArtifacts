@@ -18,10 +18,9 @@
 # Always Run As Administrator
 ###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-#$username = ($env:USERDOMAIN + "\" + $env:USERNAME).ToString()
-$credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
+$username = $env:USERNAME
+$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($username)", $password)
 
-. ([ScriptBlock]::Create($imports))
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
     #Make sure the installers directory exists so subsequent scripts can access the location without issues.
     $targetDir = "c:\EpicorInstallers\"
