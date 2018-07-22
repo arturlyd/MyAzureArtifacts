@@ -18,8 +18,8 @@
 # Always Run As Administrator
 ###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
-$username = ($env:USERDOMAIN + "\" + $env:USERNAME).ToString()
-$credential = New-Object System.Management.Automation.PSCredential($username, $password)
+#$username = ($env:USERDOMAIN + "\" + $env:USERNAME).ToString()
+$credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
 
 . ([ScriptBlock]::Create($imports))
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
