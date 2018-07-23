@@ -38,6 +38,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
     }
     Function LogWrite ([string]$logstring)
     {
+        write-host $logstring -ForegroundColor Green
         Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
     }
     Remove-Item $Logfile -ErrorAction SilentlyContinue
@@ -69,7 +70,6 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
     if($netver -eq "4.7.1")
     {
         LogWrite ("############# Installing .NET 4.7.1) ###################")
-        write-host ("Installing .NET "+$netver)
         try{
 
             choco install dotnetfx --version 4.7.1.0
@@ -80,12 +80,10 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
             break
         }
         LogWrite ("############# .NET 4.7.1 successfully installed) ###################")
-        write-host ("Successfully installed .NET "+$netver)
     }
     else
     {
         LogWrite ("############# Installing .NET 4.7.2) ###################")
-        write-host ("Installing .NET "+$netver)
         try{
 
             choco install dotnetfx --version 4.7.2.0
@@ -96,6 +94,5 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
             break
         }
         LogWrite ("############# .NET 4.7.2 successfully installed) ###################")
-        write-host ("Successfully installed .NET "+$netver)
     }
 }
