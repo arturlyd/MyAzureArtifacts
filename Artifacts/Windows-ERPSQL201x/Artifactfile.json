@@ -18,15 +18,9 @@
       "allowedValues": [
         "sql2016", "sql2017"
       ]
-    },
-    "ssms": {
-      "type": "bool",
-      "displayName": "Install SSMS",
-      "description": "Installs SSMS (Sql Server Management Studio for the version selected)",
-      "defaultValue": true
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver'), ' ' parameters('ssms'))]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver'))]"
   }
 }
