@@ -12,6 +12,7 @@
 ###
 [CmdletBinding()]
 param(
+    [Parameter(Mandatory = $true)]
     [string] $netver = "4.7.2"
 )
 

@@ -15,8 +15,6 @@
       "displayName": ".Net Version",
       "description": "The .NET version to install (4.7.1 / 4.7.2)",
       "defaultValue": "4.7.2",
-      "maxLength": 1,
-      "minLength": 1,
       "allowedValues": [
         "4.7.1", "4.7.2"
       ]
