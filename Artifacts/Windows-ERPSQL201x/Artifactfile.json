@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-  "title": "SQL 2017 Installer ",
-  "description": "Downloads and installs ERP SQL Server 2017/2016, SSRS and SSMS to VM",
+  "title": "SQL 2016/2017 Installer ",
+  "description": "Downloads, installs and configures ERP SQL Server 2017/2016, SSRS and SSMS to VM",
   "publisher": "QA Tools",
   "tags": [
     "Windows",
@@ -13,7 +13,7 @@
     "sqlver": {
       "type": "string",
       "displayName": "SQL Server Version",
-      "description": "Sql server Version to install: 2016/2017",
+      "description": "Sql server Version to install: 2016 / 2017",
       "defaultValue": "sql2017",
       "allowedValues": [
         "sql2016", "sql2017"
@@ -27,6 +27,6 @@
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver'), ' ' parameters('ssms')]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver'), ' ' parameters('ssms'))]"
   }
 }
