@@ -4,27 +4,26 @@
     ===========
 
 	- This script does the following -
-		- Installs Windows 2016 roles for ERP 10
-
-
-
-    Usage examples
-    ==============
-
-
+        - Installs .NET 4.7.1 or 4.7.2 depending on the input paramter 
+        - Default Value: 4.7.2
 
 ##################################################################################################>
-# Please run this tool to install Server Prerequisites for Server 2016
 # Always Run As Administrator
 ###
+[CmdletBinding()]
+param(
+    [string] $netver = "4.7.2"
+)
+
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
 
-. ([ScriptBlock]::Create($imports))
-Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
+Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $netver -ScriptBlock{
+    Param( $netver )
+    . ([ScriptBlock]::Create($netver))
     #Make sure the installers directory exists so subsequent scripts can access the location without issues
     $targetDir = "c:\EpicorInstallers\"
-    $Logfile = ($targetDir + "NET471.log")
+    $Logfile = ($targetDir + "NET47x.log")
     if(!(Test-Path -Path $targetDir )){
         New-Item -ItemType directory -Path $targetDir
     }
@@ -66,14 +65,36 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBl
         LogError
         break
     }
-    LogWrite ("############# Installing .NET 4.7.1) ###################")
-    try{
-        choco install dotnetfx --version 4.7.1.0
-    }
-    catch
+    if($netver -eq "4.7.1")
     {
-        LogError
-        break
+        LogWrite ("############# Installing .NET 4.7.1) ###################")
+        write-host ("Installing .NET "+$netver)
+        try{
+
+            choco install dotnetfx --version 4.7.1.0
+        }
+        catch
+        {
+            LogError
+            break
+        }
+        LogWrite ("############# .NET 4.7.1 successfully installed) ###################")
+        write-host ("Successfully installed .NET "+$netver)
     }
-    LogWrite ("############# .NET 4.7.1 successfully installed) ###################")
+    else
+    {
+        LogWrite ("############# Installing .NET 4.7.2) ###################")
+        write-host ("Installing .NET "+$netver)
+        try{
+
+            choco install dotnetfx --version 4.7.2.0
+        }
+        catch
+        {
+            LogError
+            break
+        }
+        LogWrite ("############# .NET 4.7.2 successfully installed) ###################")
+        write-host ("Successfully installed .NET "+$netver)
+    }
 }

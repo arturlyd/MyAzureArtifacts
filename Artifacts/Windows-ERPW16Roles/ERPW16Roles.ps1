@@ -19,8 +19,8 @@
 ###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\qatools", $password)
-$username = $env:USERNAME
-$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($username)", $password)
+#$username = $env:USERNAME
+#$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($username)", $password)
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
     #Make sure the installers directory exists so subsequent scripts can access the location without issues.
     $targetDir = "c:\EpicorInstallers\"
