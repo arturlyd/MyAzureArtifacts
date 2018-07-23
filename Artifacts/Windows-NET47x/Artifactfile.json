@@ -21,6 +21,6 @@
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File NET47x.ps1', ' -netversion ''', parameters('netversion'))]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File NET47x.ps1 ', parameters('netversion'))]"
   }
 }

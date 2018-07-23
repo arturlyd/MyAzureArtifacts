@@ -6,17 +6,9 @@
 	- This script does the following -
 		- Installs Windows 2016 roles for ERP 10
 
-
-
-    Usage examples
-    ==============
-
-
-
 ##################################################################################################>
-# Please run this tool to install Server Prerequisites for Server 2016
+
 # Always Run As Administrator
-###
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\qatools", $password)
 #$username = $env:USERNAME
