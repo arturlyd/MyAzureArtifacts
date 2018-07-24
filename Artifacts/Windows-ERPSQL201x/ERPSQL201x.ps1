@@ -13,22 +13,16 @@ param(
 $UserName = $env:USERNAME
 $secPassword = ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($UserName)", $secPassword)
-    
+
 if ($sqlver -eq "sql2016")
 {
     $command = "$PSScriptRoot\ERPDLSQL2016.ps1 $ssms"
-        
+
 }
 if ($sqlver -eq "sql2017")
 {
     $command = "$PSScriptRoot\ERPDLSQL2017.ps1 $ssms"
 }
-try
-{
-    Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $credential -FilePath $command -ArgumentList $PackageList
-}
-catch
-{
-    Handle-LastError
-}
+Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $credential -FilePath $command -ArgumentList $PackageList
+
 
