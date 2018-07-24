@@ -23,7 +23,11 @@
       "type": "bool",
       "displayName": "SSMS",
       "description": "Installs SQL Server Mangament Studio",
-      "defaultValue": "true"
+      "defaultValue": true,
+      "allowedValues": [
+        true,
+        false
+    ]
     }
   },
   "runCommand": {
