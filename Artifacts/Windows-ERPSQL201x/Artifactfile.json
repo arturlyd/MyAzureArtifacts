@@ -18,9 +18,15 @@
       "allowedValues": [
         "sql2016", "sql2017"
       ]
+    },
+    "ssms": {
+      "type": "bool",
+      "displayName": "SSMS",
+      "description": "Installs SQL Server Mangament Studio",
+      "defaultValue": "true"
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver'))]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver') ' ', parameters('ssms') )]"
   }
 }
