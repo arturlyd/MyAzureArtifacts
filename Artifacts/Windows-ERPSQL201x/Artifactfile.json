@@ -21,7 +21,7 @@
     },
     "ssms": {
       "type": "bool",
-      "displayName": "SSMS",
+      "displayName": "Install SQL Server Mgmt Studio",
       "description": "Installs SQL Server Mangament Studio",
       "defaultValue": true,
       "allowedValues": [
