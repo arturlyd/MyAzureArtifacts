@@ -72,7 +72,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
         LogWrite ("############# Installing .NET 4.7.1) ###################")
         try{
 
-            choco install dotnetfx --version 4.7.1.0
+            choco upgrade dotnetfx --version 4.7.1.0
         }
         catch
         {
@@ -86,7 +86,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
         LogWrite ("############# Installing .NET 4.7.2) ###################")
         try{
 
-            choco install dotnetfx --version 4.7.2.0
+            choco upgrade dotnetfx --version 4.7.2.0
         }
         catch
         {
