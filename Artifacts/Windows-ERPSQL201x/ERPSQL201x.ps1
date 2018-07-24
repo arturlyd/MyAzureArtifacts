@@ -13,7 +13,7 @@ param(
 $UserName = $env:USERNAME
 $secPassword = ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($UserName)", $secPassword)
-
+write-host "folder del script: " $PSScriptRoot
 if ($sqlver -eq "sql2016")
 {
     $command = "$PSScriptRoot\ERPDLSQL2016.ps1 $ssms"
