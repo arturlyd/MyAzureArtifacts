@@ -4,7 +4,7 @@
     ===========
 
 	- This script does the following -
-        - Installs .NET 4.7.1 or 4.7.2 depending on the input paramter 
+        - Installs .NET 4.7.1 or 4.7.2 depending on the input paramter
         - Default Value: 4.7.2
 
 ##################################################################################################>
