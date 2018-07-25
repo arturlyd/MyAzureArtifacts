@@ -155,7 +155,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    
+
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
     try{
@@ -185,5 +185,5 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     catch{
         LogError
         break
-    }   
+    }
 }
