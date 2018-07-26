@@ -23,6 +23,7 @@ $credential = New-Object System.Management.Automation.PSCredential("$env:USERDOM
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
 
 $StorageAccountName = "aqatoolslab2420"
+$blobUri = "https://aqatoolslab2420.blob.core.windows.net/"
 $blobSas = "sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2027-06-06T05:11:13Z&st=2018-06-05T21:11:13Z&spr=https,http&sig=vdilQIbevC02X6gu8d%2FQt25%2BUClG7FCRrchlogcFI2Q%3D"
 $storageContext = New-AzureStorageContext $StorageAccountName -SasToken ("?"+$blobSas)
 $containerName = "isos"
@@ -149,7 +150,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     ############ Downloads ISO and installs ERP ###############
     LogWrite ("############ Downloads ISO and installs ERP ###############")
     try{
-        Install-Erp -E10Version $erpVersion$erpPatch -installMediaDirectory $targetDir -e10MediaBlobUri "https://aqatoolslab2420.blob.core.windows.net/" -blobContainerName $containerName -e10MediaSAS $blobSas
+        Install-Erp -E10Version $erpVersion$erpPatch -installMediaDirectory $targetDir -e10MediaBlobUri $blobUri -blobContainerName $containerName -e10MediaSAS $blobSas
     }
     catch{
         LogError
@@ -170,7 +171,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     LogWrite ("################# Install License #####################")
     try{
         Get-AzureStorageBlobContent -Container $licContainerName -Blob $licenseID -Destination ($targetDir + $licenseID) -Context $StorageContext -Force
-        Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath "C:\temp" -E10Version $erpVersion$erpPatch -AppserverUri ("https://" + $env:ComputerName + "/" + $appserverName) -ErpUserName $epicorGSM -ErpUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -EndpointBinding $erpBinding -ErpDatabaseName $targetDBName -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlAuthenticationIsIntegratedSecurity $false -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -ReplaceExistingLicense
+        Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath "C:\temp" -E10Version $erpVersion$erpPatch -AppserverUri ("https://" + $env:ComputerName + "/" + $appserverName) -ErpUserName $epicorGSM -ErpUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -EndpointBinding $erpBinding -ErpDatabaseName $targetDBName -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlAuthenticationIsIntegratedSecurity $false -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force)
     }
     catch{
         LogError
