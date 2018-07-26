@@ -8,12 +8,6 @@
         it has its own license so we are not charged for that by Azure
 
 ##################################################################################################>
-[CmdletBinding()]
-param(
-    [string] $ssms = $true
-)
-
-
 $StorageAccountName = "aqatoolslab2420"
 $blobSas = "?sv=2017-11-09&ss=bfqt&srt=sco&sp=rwdlacup&se=2027-06-06T05:11:13Z&st=2018-06-05T21:11:13Z&spr=https,http&sig=vdilQIbevC02X6gu8d%2FQt25%2BUClG7FCRrchlogcFI2Q%3D"
 $storageContext = New-AzureStorageContext $StorageAccountName -SasToken $blobSas
@@ -56,24 +50,21 @@ Dismount-DiskImage -ImagePath $SqlServerIsoImagePath
 #print Time taken to execute
 $sw.Stop()
 "Sql install script completed in {0:c}" -f $sw.Elapsed;
-write-host ("SSMS is >>>> "+$ssms.ToString())
-if($ssms -eq $true)
-{
-    ##################### Install SSMS #############################
-    # Set file and folder path for SSMS installer .exe
-    $filepath="$targetDir$blobSSMS"
-    $Parms = " /Install /Quiet /Norestart /Logs log.txt"
-    Start-Process -FilePath $filepath -ArgumentList $Parms -Wait
-    <#
-    #If SSMS not present, download
-    if (!(Test-Path $filepath)){
-    write-host "Downloading SQL Server 2017 SSMS..."
-    $URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
-    $clnt = New-Object System.Net.WebClient
-    $clnt.DownloadFile($url,$filepath)
-    }
-    #>
+
+##################### Install SSMS #############################
+# Set file and folder path for SSMS installer .exe
+$filepath="$targetDir$blobSSMS"
+$Parms = " /Install /Quiet /Norestart /Logs log.txt"
+Start-Process -FilePath $filepath -ArgumentList $Parms -Wait
+<#
+#If SSMS not present, download
+if (!(Test-Path $filepath)){
+write-host "Downloading SQL Server 2017 SSMS..."
+$URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
+$clnt = New-Object System.Net.WebClient
+$clnt.DownloadFile($url,$filepath)
 }
+#>
 ##################### Install SSRS ############################
 $Parms = "/IAcceptLicenseTerms /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89  /norestart /quiet"
 Start-Process -FilePath $targetDir$blobSSRS -ArgumentList $Parms -Wait

@@ -1,10 +1,8 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [string] $sqlver = "sql2016",
-    [Parameter(Mandatory = $false)]
-    [string] $ssms = $true
-)
+    [string] $sqlver = "sql2016"
+ )
 
 
 
@@ -15,13 +13,12 @@ param(
 #$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($UserName)", $secPassword)
 if ($sqlver -eq "sql2016")
 {
-    .\ERPDLSQL2016.ps1 $ssms
+    .\ERPDLSQL2016.ps1
 
 }
 if ($sqlver -eq "sql2017")
 {
-    write-host ("SSMS before script >>> "+ $ssms.ToString())
-    .\ERPDLSQL2017.ps1 $ssms
+    .\ERPDLSQL2017.ps1
 }
 #Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $credential -FilePath $command -ArgumentList $PackageList
 
