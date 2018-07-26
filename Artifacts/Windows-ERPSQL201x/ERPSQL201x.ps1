@@ -20,6 +20,7 @@ if ($sqlver -eq "sql2016")
 }
 if ($sqlver -eq "sql2017")
 {
+    write-host ("SSMS before script >>> "+ $ssms.ToString())
     .\ERPDLSQL2017.ps1 $ssms
 }
 #Invoke-Command -ComputerName $env:COMPUTERNAME -Credential $credential -FilePath $command -ArgumentList $PackageList

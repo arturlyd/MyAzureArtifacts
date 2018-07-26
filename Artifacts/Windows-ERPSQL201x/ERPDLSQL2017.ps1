@@ -56,7 +56,7 @@ Dismount-DiskImage -ImagePath $SqlServerIsoImagePath
 #print Time taken to execute
 $sw.Stop()
 "Sql install script completed in {0:c}" -f $sw.Elapsed;
-
+write-host ("SSMS is >>>> "+$ssms.ToString())
 if($ssms -eq $true)
 {
     ##################### Install SSMS #############################
