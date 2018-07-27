@@ -31,6 +31,6 @@
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver'), ' $', parameters('ssms'))]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERPSQL201x.ps1 ', parameters('sqlver'))]"
   }
 }
