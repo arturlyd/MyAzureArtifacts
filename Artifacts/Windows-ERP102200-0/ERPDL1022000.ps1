@@ -29,6 +29,7 @@ $storageContext = New-AzureStorageContext $StorageAccountName -SasToken ("?"+$bl
 $containerName = "isos"
 $licContainerName = "licenses"
 $targetDir = "c:\EpicorInstallers\"
+$logfilesdir = "C:\temp"
 $dbBackup = "Demo32200Build6.bak"
 $targetSqlUser = "sa"
 $targetSqlPassword = "Epicor123"
@@ -160,7 +161,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
     try{
-        Install-ErpAppserver -E10Version $erpVersion$erpPatch -LogFilesPath "C:\temp" -AppserverName $appserverName -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -UseApppoolIdentity $true -ApplicationPoolUserName $apppoolUserName -ApplicationPoolUserPassword (ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force) -EpicorDatabaseName $appserverName -HttpsBinding $erpBinding -DNSIdentity $erpCert -ServerName $env:ComputerName -CreateSsrsDatabase $true -ConfigureSsrsReports $true -SsrsDatabaseName $ssrsDBName -SsrsInstallLocation $ssrsServerInstallPath -SSRSBaseUrl $ssrsBaseURL -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -CheckForBugFixes
+        Install-ErpAppserver -E10Version $erpVersion$erpPatch -LogFilesPath $logfilesdir -AppserverName $appserverName -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -UseApppoolIdentity $true -ApplicationPoolUserName $apppoolUserName -ApplicationPoolUserPassword (ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force) -EpicorDatabaseName $appserverName -HttpsBinding $erpBinding -DNSIdentity $erpCert -ServerName $env:ComputerName -CreateSsrsDatabase $true -ConfigureSsrsReports $true -SsrsDatabaseName $ssrsDBName -SsrsInstallLocation $ssrsServerInstallPath -SSRSBaseUrl $ssrsBaseURL -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -CheckForBugFixes
     }
     catch{
         LogError
@@ -171,7 +172,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     LogWrite ("################# Install License #####################")
     try{
         Get-AzureStorageBlobContent -Container $licContainerName -Blob $licenseID -Destination ($targetDir + $licenseID) -Context $StorageContext -Force
-        Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath "C:\temp" -E10Version $erpVersion$erpPatch -AppserverUri ("https://" + $env:ComputerName + "/" + $appserverName) -ErpUserName $epicorGSM -ErpUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -EndpointBinding $erpBinding -ErpDatabaseName $targetDBName -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlAuthenticationIsIntegratedSecurity $false -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force)
+        Install-ErpLicense -LicenseFilePath $targetDir$licenseID -LogFilesPath $logfilesdir -E10Version $erpVersion$erpPatch -AppserverUri ("https://" + $env:ComputerName + "/" + $appserverName) -ErpUserName $epicorGSM -ErpUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -EndpointBinding $erpBinding -ErpDatabaseName $targetDBName -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlAuthenticationIsIntegratedSecurity $false -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force)
     }
     catch{
         LogError
@@ -181,7 +182,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     ############## Launch Conversion Runner ######################
     LogWrite ("############## Launch Conversion Runner ######################")
     try{
-        Start-ConversionRunner -E10Version $erpVersion$erpPatch -EpicorSmartClientFolder ($erpInstallPatch + "LocalClients\" + $appserverName) -LogFilesPath "C:\temp" -SysConfigFilePath ($erpInstallPatch + "LocalClients\" + $appserverName + "\Config\" + $appserverName +".sysconfig") -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
+        Start-ConversionRunner -E10Version $erpVersion$erpPatch -EpicorSmartClientFolder ($erpInstallPatch + "LocalClients\" + $appserverName) -LogFilesPath $logfilesdir -SysConfigFilePath ($erpInstallPatch + "LocalClients\" + $appserverName + "\Config\" + $appserverName +".sysconfig") -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
     }
     catch{
         LogError
