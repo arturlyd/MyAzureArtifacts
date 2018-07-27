@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/schemas/2016-11-28/dtlArtifacts.json",
-  "title": "SQL 2016/2017 Installer ",
-  "description": "Downloads, installs and configures ERP SQL Server 2017/2016, SSRS and SSMS to VM",
+  "title": "ONE TWO",
+  "description": "ONE TWO",
   "publisher": "QA Tools",
   "tags": [
     "Windows",
@@ -12,17 +12,17 @@
   "parameters": {
     "onetwo": {
       "type": "string",
-      "displayName": "SQL Server Version",
-      "description": "Sql server Version to install: 2016 / 2017",
-      "defaultValue": "sql2017",
+      "displayName": "ONE TWO",
+      "description": "ONE TWO",
+      "defaultValue": "one",
       "allowedValues": [
-        "sql2016", "sql2017"
+        "one", "two"
       ]
     },
     "checkbx": {
       "type": "bool",
-      "displayName": "SQL Server Version",
-      "description": "Sql server Version to install: 2016 / 2017",
+      "displayName": "checkbx",
+      "description": "checkbx",
       "defaultValue": true,
       "allowedValues": [
         true, false
