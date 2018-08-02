@@ -92,36 +92,33 @@ finally
     #Remove SQL Server ISO
     Remove-Item -Path $SqlServerIsoImagePath -ErrorAction SilentlyContinue
 }
-if($ssms -eq $true)
+try{
+    #If SSMS not present, download
+    <#if (!(Test-Path $filepath)){
+    write-host "Downloading SQL Server 2016 SSMS..."
+    $URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
+    $clnt = New-Object System.Net.WebClient
+    $clnt.DownloadFile($url,$filepath)
+    Write-Host "SSMS installer download complete" -ForegroundColor Green
+
+    }
+    else {
+
+    write-host "Located the SQL SSMS Installer binaries, moving on to install..."
+    }#>
+
+    # start the SSMS installer
+    write-host "Beginning SSMS 2016 install..." -nonewline
+    $Parms = " /Install /Quiet /Norestart /Logs log.txt"
+    Start-Process -FilePath $targetDir$blobSSMS -ArgumentList $Parms -Wait
+}
+catch
 {
-    try{
-        #If SSMS not present, download
-        <#if (!(Test-Path $filepath)){
-        write-host "Downloading SQL Server 2016 SSMS..."
-        $URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
-        $clnt = New-Object System.Net.WebClient
-        $clnt.DownloadFile($url,$filepath)
-        Write-Host "SSMS installer download complete" -ForegroundColor Green
-    
-        }
-        else {
-    
-        write-host "Located the SQL SSMS Installer binaries, moving on to install..."
-        }#>
-    
-        # start the SSMS installer
-        write-host "Beginning SSMS 2016 install..." -nonewline
-        $Parms = " /Install /Quiet /Norestart /Logs log.txt"
-        Start-Process -FilePath $targetDir$blobSSMS -ArgumentList $Parms -Wait
-    }
-    catch
-    {
-        LogError
-        break
-    }
-    finally 
-    {
-        #Remove SSMS Installer
-        Remove-Item -Path $targetDir$blobSSMS -ErrorAction SilentlyContinue
-    }
+    LogError
+    break
+}
+finally 
+{
+    #Remove SSMS Installer
+    Remove-Item -Path $targetDir$blobSSMS -ErrorAction SilentlyContinue
 }
