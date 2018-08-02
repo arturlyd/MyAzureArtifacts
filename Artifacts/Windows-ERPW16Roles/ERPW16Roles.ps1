@@ -16,9 +16,9 @@ $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTE
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
     #Make sure the installers directory exists so subsequent scripts can access the location without issues.
     $targetDir = "c:\EpicorInstallers\"
-    $Logfile = ($targetDir + "ERPW16Roles.log")
-    if(!(Test-Path -Path $targetDir )){
-        New-Item -ItemType directory -Path $targetDir
+    $Logfile = ("$targetDir\logfiles\ERPW16Roles.log")
+    if(!(Test-Path -Path "$targetDir\logfiles" )){
+        New-Item -ItemType directory -Path "$targetDir\logfiles"
     }
     function LogError {
         $exceptionObject = $_.Exception

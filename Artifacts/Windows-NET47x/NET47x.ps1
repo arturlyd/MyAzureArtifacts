@@ -24,9 +24,9 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -Argument
     . ([ScriptBlock]::Create($netver))
     #Make sure the installers directory exists so subsequent scripts can access the location without issues
     $targetDir = "c:\EpicorInstallers\"
-    $Logfile = ($targetDir + "NET47x.log")
-    if(!(Test-Path -Path $targetDir )){
-        New-Item -ItemType directory -Path $targetDir
+    $Logfile = ("$targetDir\logfiles\NET47x.log")
+    if(!(Test-Path -Path "$targetDir\logfiles")){
+        New-Item -ItemType directory -Path "$targetDir\logfiles"
     }
     function LogError {
         $exceptionObject = $_.Exception

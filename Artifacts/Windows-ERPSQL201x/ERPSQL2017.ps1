@@ -19,8 +19,9 @@ $blobSSRS = "SQLServerReportingServices2017.exe"
 $blobIni = "MyConfigurationFileSQL2017.ini"
 $SQLServerInstance = "(local)\SQL2017"
 
-if(!(Test-Path -Path $targetDir )){
-	New-Item -ItemType directory -Path $targetDir
+$Logfile = ("$targetDir\logfiles\ERP10.2.200.log")
+if(!(Test-Path -Path "$targetDir\logfiles" )){
+	New-Item -ItemType directory -Path "$targetDir\logfiles"
 }
 function LogError {
     $exceptionObject = $_.Exception

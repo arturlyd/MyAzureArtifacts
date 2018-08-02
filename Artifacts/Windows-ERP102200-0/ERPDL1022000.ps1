@@ -29,13 +29,12 @@ $storageContext = New-AzureStorageContext $StorageAccountName -SasToken ("?"+$bl
 $containerName = "isos"
 $licContainerName = "licenses"
 $targetDir = "c:\EpicorInstallers\"
-$logfilesdir = "C:\temp"
+$logfilesdir = "$targetDir\logfiles"
 $dbBackup = "Demo32200Build6.bak"
 $targetSqlUser = "sa"
 $targetSqlPassword = "Epicor123"
 $defaultWebSiteName = "Default Web Site"
 $computerName = $env:ComputerName
-$Logfile = ($targetDir + "ERPDL1022000.log")
 $erpVersion = "10.2.200"
 $erpPatch = ".10"
 $epicorGSM = "epicor"
@@ -52,7 +51,8 @@ $ssrsBaseURL = "http://$env:ComputerName/ReportServer"
 $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
-if(!(Test-Path -Path $targetDir )){
+$Logfile = ("$targetDir\logfiles\" + "ERP10.2.200.log")
+if(!(Test-Path -Path "$targetDir\logfiles" )){
     New-Item -ItemType directory -Path $targetDir
 }
 function LogError {
@@ -157,6 +157,16 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     catch{
         LogError
         break
+    }
+    finally 
+    {
+        #Remove ERP ISO
+        Remove-Item -Path $targetDir"RL"$erpVersion".iso" -ErrorAction SilentlyContinue
+        if($erpPatch -ne ".0")
+        {
+            #Remove Update exe
+            Remove-Item -Path $targetDir"UD"$erpVersion$erpPatch".exe" -ErrorAction SilentlyContinue
+        }
     }
 
     ############ Deploy Appserver + Reports ###############

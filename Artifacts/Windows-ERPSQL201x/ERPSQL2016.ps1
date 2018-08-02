@@ -25,10 +25,9 @@ $blobSSMS = "SSMS2016-Setup-ENU.exe"
 $blobIni = "MyConfigurationFileSQL2016.ini"
 
 #Make sure the installers directory exists so subsequent scripts can access the location without issues.
-$targetDir = "c:\EpicorInstallers\"
-$Logfile = ($targetDir + "ERPDLSQL2016.log")
-if(!(Test-Path -Path $targetDir )){
-    New-Item -ItemType directory -Path $targetDir
+$Logfile = ("$targetDir\logfiles\ERPSQL2016.log")
+if(!(Test-Path -Path "$targetDir\logfiles" )){
+    New-Item -ItemType directory -Path "$targetDir\logfiles"
 }
 function LogError {
     $exceptionObject = $_.Exception
