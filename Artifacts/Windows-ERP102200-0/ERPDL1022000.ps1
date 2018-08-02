@@ -37,7 +37,7 @@ $defaultWebSiteName = "Default Web Site"
 $computerName = $env:ComputerName
 $Logfile = ($targetDir + "ERPDL1022000.log")
 $erpVersion = "10.2.200"
-$erpPatch = ".9"
+$erpPatch = ".10"
 $epicorGSM = "epicor"
 $epicorPass = "epicor"
 $apppoolUserName = "$env:ComputerName\$env:USERNAME"
@@ -66,6 +66,7 @@ function LogError {
 Function LogWrite ([string]$logstring)
 {
     Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
+    LogMessage ((Get-Date).ToString()+ ": " +$logstring)
 }
 Remove-Item $Logfile -ErrorAction SilentlyContinue
 
