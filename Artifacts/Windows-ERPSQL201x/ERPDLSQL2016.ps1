@@ -41,6 +41,7 @@ function LogError {
 Function LogWrite ([string]$logstring)
 {
     Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
+    Write-Host ((Get-Date).ToString()+ ": " +$logstring)
 }
 Remove-Item $Logfile -ErrorAction SilentlyContinue
 
@@ -61,7 +62,6 @@ try {
     #Installs SQL Server locally with standard settings for Developers/Testers.
     # Install SQL from command line help - https://msdn.microsoft.com/en-us/library/ms144259.aspx
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $currentUserName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name;
     $SqlServerIsoImagePath = "$targetDir$blobName"
 
     #Mount the installation media, and change to the mounted Drive.
@@ -80,17 +80,21 @@ try {
     #print Time taken to execute
     $sw.Stop()
     "Sql install script completed in {0:c}" -f $sw.Elapsed;
+       
 }
 catch
 {
     LogError
     break
 }
+finally 
+{
+    #Remove SQL Server ISO
+    Remove-Item -Path $SqlServerIsoImagePath -ErrorAction SilentlyContinue
+}
 if($ssms -eq $true)
 {
     try{
-        # Set file and folder path for SSMS installer .exe
-        $filepath="$targetDir$blobSSMS"
         #If SSMS not present, download
         <#if (!(Test-Path $filepath)){
         write-host "Downloading SQL Server 2016 SSMS..."
@@ -108,11 +112,16 @@ if($ssms -eq $true)
         # start the SSMS installer
         write-host "Beginning SSMS 2016 install..." -nonewline
         $Parms = " /Install /Quiet /Norestart /Logs log.txt"
-        Start-Process -FilePath $filepath -ArgumentList $Parms -Wait
+        Start-Process -FilePath $targetDir$blobSSMS -ArgumentList $Parms -Wait
     }
     catch
     {
         LogError
         break
+    }
+    finally 
+    {
+        #Remove SSMS Installer
+        Remove-Item -Path $targetDir$blobSSMS -ErrorAction SilentlyContinue
     }
 }

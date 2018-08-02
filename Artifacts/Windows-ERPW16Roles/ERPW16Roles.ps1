@@ -31,6 +31,7 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBl
     Function LogWrite ([string]$logstring)
     {
         Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
+        Write-Host ((Get-Date).ToString()+ ": " +$logstring)
     }
     Remove-Item $Logfile -ErrorAction SilentlyContinue
     LogWrite ("Prueba para ver que dominio y usuario pone " + $env:USERDOMAIN + "\" +$env:USERNAME)

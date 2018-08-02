@@ -22,125 +22,174 @@ $SQLServerInstance = "(local)\SQL2017"
 if(!(Test-Path -Path $targetDir )){
 	New-Item -ItemType directory -Path $targetDir
 }
+function LogError {
+    $exceptionObject = $_.Exception
+    $exceptionData = "$($exceptionObject.Message)"
+    $invokationInfo = $_.InvocationInfo
+    $invokationData = "@ $($invokationInfo.PositionMessage) `r`n FullLine $($invokationInfo.Line)"
+    $formattedError = "$($exceptionData) `r`n $($invokationData)"
+    LogWrite("There was an error: $formattedError")
+}
+Function LogWrite ([string]$logstring)
+{
+	Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
+	Write-Host ((Get-Date).ToString()+ ": " +$logstring)
+}
+Remove-Item $Logfile -ErrorAction SilentlyContinue
+
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobName -Destination ($targetDir + $blobName) -Context $StorageContext -Force #download SQL Server ISO
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobSSMS -Destination ($targetDir + $blobSSMS) -Context $StorageContext -Force #download SSMS exe
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobSSRS -Destination ($targetDir + $blobSSRS) -Context $StorageContext -Force #download SSRS exe
 #Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobKey -Destination ($targetDir + $blobKey) -Context $StorageContext -Force #download SQL Server Serial Key
 Get-AzureStorageBlobContent -Container $ContainerName -Blob $blobIni -Destination ($targetDir + $blobIni) -Context $StorageContext -Force #Download ini file for silent installation
+try{
+	#Installs SQL Server locally with standard settings for Developers/Testers.
+	# Install SQL from command line help - https://msdn.microsoft.com/en-us/library/ms144259.aspx
+	$sw = [Diagnostics.Stopwatch]::StartNew()
+	#$currentUserName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name;
+	$SqlServerIsoImagePath = "$targetDir$blobName"
 
-#Installs SQL Server locally with standard settings for Developers/Testers.
-# Install SQL from command line help - https://msdn.microsoft.com/en-us/library/ms144259.aspx
-$sw = [Diagnostics.Stopwatch]::StartNew()
-#$currentUserName = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name;
-$SqlServerIsoImagePath = "$targetDir$blobName"
+	#Mount the installation media, and change to the mounted Drive.
+	$mountVolume = Mount-DiskImage -ImagePath $SqlServerIsoImagePath -PassThru
+	$driveLetter = ($mountVolume | Get-Volume).DriveLetter
+	$drivePath = $driveLetter + ":"
+	push-location -path "$drivePath"
 
-#Mount the installation media, and change to the mounted Drive.
-$mountVolume = Mount-DiskImage -ImagePath $SqlServerIsoImagePath -PassThru
-$driveLetter = ($mountVolume | Get-Volume).DriveLetter
-$drivePath = $driveLetter + ":"
-push-location -path "$drivePath"
+	#Install SQL Server locally
+	#.\Setup.exe /q /ACTION=Install /SUPPRESSPRIVACYSTATEMENTNOTICE="True" /IACCEPTROPENLICENSETERMS="True" /ENU="True" /QUIET="True" /FEATURES="SQLEngine,FullText,RS" LocalDB /UpdateEnabled /UpdateSource=MU /X86=false /INDICATEPROGRESS="False" /INSTANCENAME=SQL2016 /INSTALLSHAREDDIR="C:\Program Files\Microsoft SQL Server" /INSTALLSHAREDWOWDIR="C:\Program Files (x86)\Microsoft SQL Server" /INSTANCEID="SQL2016" /RSINSTALLMODE="DefaultNativeMode" /SQLSVCINSTANTFILEINIT="False" /INSTANCEDIR="C:\Program Files\Microsoft SQL Server" /AGTSVCACCOUNT="NT Service\SQLAgent$SQL2016" /AGTSVCSTARTUPTYPE="Manual" /COMMFABRICPORT="0" /COMMFABRICNETWORKLEVEL="0" /COMMFABRICENCRYPTION="0" /MATRIXCMBRICKCOMMPORT="0" /SQLSVCSTARTUPTYPE="Automatic" /SQLSYSADMINACCOUNTS=".\manager" /FILESTREAMLEVEL="0" /ENABLERANU="False" /SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS" /SQLSVCACCOUNT="NT Service\MSSQL$SQL2016" /SECURITYMODE="SQL" /SQLTEMPDBFILECOUNT="1" /SQLTEMPDBFILESIZE="8" /SQLTEMPDBFILEGROWTH="64" /SQLTEMPDBLOGFILESIZE="8" /SQLTEMPDBLOGFILEGROWTH="64" /TCPENABLED="1" /NPENABLED="1" /BROWSERSVCSTARTUPTYPE="Automatic" /RSSVCACCOUNT="NT Service\ReportServer$SQL2016" /RSSVCSTARTUPTYPE="Automatic" /FTSVCACCOUNT="NT Service\MSSQLFDLauncher$SQL2016" /SAPWD="Epicor123" /SQLSYSADMINACCOUNTS="$currentUserName" /IACCEPTSQLSERVERLICENSETERMS
+	.\Setup.exe /ConfigurationFile="$targetDir$blobIni"
+	#Dismount the installation media.
+	pop-location
+	Dismount-DiskImage -ImagePath $SqlServerIsoImagePath
 
-#Install SQL Server locally
-#.\Setup.exe /q /ACTION=Install /SUPPRESSPRIVACYSTATEMENTNOTICE="True" /IACCEPTROPENLICENSETERMS="True" /ENU="True" /QUIET="True" /FEATURES="SQLEngine,FullText,RS" LocalDB /UpdateEnabled /UpdateSource=MU /X86=false /INDICATEPROGRESS="False" /INSTANCENAME=SQL2016 /INSTALLSHAREDDIR="C:\Program Files\Microsoft SQL Server" /INSTALLSHAREDWOWDIR="C:\Program Files (x86)\Microsoft SQL Server" /INSTANCEID="SQL2016" /RSINSTALLMODE="DefaultNativeMode" /SQLSVCINSTANTFILEINIT="False" /INSTANCEDIR="C:\Program Files\Microsoft SQL Server" /AGTSVCACCOUNT="NT Service\SQLAgent$SQL2016" /AGTSVCSTARTUPTYPE="Manual" /COMMFABRICPORT="0" /COMMFABRICNETWORKLEVEL="0" /COMMFABRICENCRYPTION="0" /MATRIXCMBRICKCOMMPORT="0" /SQLSVCSTARTUPTYPE="Automatic" /SQLSYSADMINACCOUNTS=".\manager" /FILESTREAMLEVEL="0" /ENABLERANU="False" /SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS" /SQLSVCACCOUNT="NT Service\MSSQL$SQL2016" /SECURITYMODE="SQL" /SQLTEMPDBFILECOUNT="1" /SQLTEMPDBFILESIZE="8" /SQLTEMPDBFILEGROWTH="64" /SQLTEMPDBLOGFILESIZE="8" /SQLTEMPDBLOGFILEGROWTH="64" /TCPENABLED="1" /NPENABLED="1" /BROWSERSVCSTARTUPTYPE="Automatic" /RSSVCACCOUNT="NT Service\ReportServer$SQL2016" /RSSVCSTARTUPTYPE="Automatic" /FTSVCACCOUNT="NT Service\MSSQLFDLauncher$SQL2016" /SAPWD="Epicor123" /SQLSYSADMINACCOUNTS="$currentUserName" /IACCEPTSQLSERVERLICENSETERMS
-.\Setup.exe /ConfigurationFile="$targetDir$blobIni"
-#Dismount the installation media.
-pop-location
-Dismount-DiskImage -ImagePath $SqlServerIsoImagePath
-
-#print Time taken to execute
-$sw.Stop()
-"Sql install script completed in {0:c}" -f $sw.Elapsed;
-
-##################### Install SSMS #############################
-# Set file and folder path for SSMS installer .exe
-$filepath="$targetDir$blobSSMS"
-$Parms = " /Install /Quiet /Norestart /Logs log.txt"
-Start-Process -FilePath $filepath -ArgumentList $Parms -Wait
-<#
-#If SSMS not present, download
-if (!(Test-Path $filepath)){
-write-host "Downloading SQL Server 2017 SSMS..."
-$URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
-$clnt = New-Object System.Net.WebClient
-$clnt.DownloadFile($url,$filepath)
+	#print Time taken to execute
+	$sw.Stop()
+	"Sql install script completed in {0:c}" -f $sw.Elapsed;
 }
-#>
-##################### Install SSRS ############################
-$Parms = "/IAcceptLicenseTerms /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89  /norestart /quiet"
-Start-Process -FilePath $targetDir$blobSSRS -ArgumentList $Parms -Wait
-
-
-##################  SSRS Configuration ##################
-rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
-
-function Get-ConfigSet()
+catch 
 {
-	return Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14\Admin" `
-		-class MSReportServer_ConfigurationSetting -ComputerName localhost
+	LogError
+    break
 }
-
-# Allow importing of sqlps module
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
-
-# Retrieve the current configuration
-$configset = Get-ConfigSet
-
-$configset
-If (! $configset.IsInitialized)
+finally 
 {
-	#Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo
-	[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
-	# Get the ReportServer and ReportServerTempDB creation script
-	[string]$dbscript = $configset.GenerateDatabaseCreationScript("ReportServer", 1033, $false).Script
-	# Establish a connection to the
-	$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
-	#$conn = New-Object system.Data.SqlClient.SqlConnection
-	$conn.ServerInstance = $SQLServerInstance
-	$conn.LoginSecure = $FALSE
-	$conn.Login = "sa"
-	$conn.Password = "Epicor123"
-	#Connect to the local, default instance of SQL Server
-	#Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo
-	[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
-	$smo = new-object Microsoft.SqlServer.Management.Smo.Server($conn)
-	# Create the ReportServer and ReportServerTempDB databases
-	$db = $smo.Databases["master"]
-	$db.ExecuteNonQuery($dbscript)
-	# Set permissions for the databases
-	$dbscript = $configset.GenerateDatabaseRightsScript($configset.WindowsServiceIdentityConfigured, "ReportServer", $false, $true).Script
-	#$dbscript = $configset.GenerateDatabaseRightsScript("localhost\qatools", "ReportServer", $false, $false).Script
-	$db.ExecuteNonQuery($dbscript)
+    #Remove SQL Server ISO
+	Remove-Item -Path $SqlServerIsoImagePath -ErrorAction SilentlyContinue
+}
+try{
+	##################### Install SSMS #############################
+	# Set file and folder path for SSMS installer .exe
+	$filepath="$targetDir$blobSSMS"
+	$Parms = " /Install /Quiet /Norestart /Logs log.txt"
+	Start-Process -FilePath $filepath -ArgumentList $Parms -Wait
+	#Remove SSMS Installer
+	Remove-Item -Path $filepath -ErrorAction SilentlyContinue
+	<#
+	#If SSMS not present, download
+	if (!(Test-Path $filepath)){
+	write-host "Downloading SQL Server 2017 SSMS..."
+	$URL = "https://download.microsoft.com/download/3/1/D/31D734E0-BFE8-4C33-A9DE-2392808ADEE6/SSMS-Setup-ENU.exe"
+	$clnt = New-Object System.Net.WebClient
+	$clnt.DownloadFile($url,$filepath)
+	}
+	#>
+	##################### Install SSRS ############################
+	$Parms = "/IAcceptLicenseTerms /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89  /norestart /quiet"
+	Start-Process -FilePath $targetDir$blobSSRS -ArgumentList $Parms -Wait
+}
+catch 
+{
+	LogError
+    break
+}
+finally 
+{
+	#Remove SSMS Installer
+	Remove-Item -Path $targetDir$blobSSMS -ErrorAction SilentlyContinue
+}
+try{
+	##################  SSRS Configuration ##################
+	rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
 
-	# Set the database connection info
-	$configset.SetDatabaseConnection($SQLServerInstance, "ReportServer", 2, "", "")
-	$configset.SetVirtualDirectory("ReportServerWebService", "ReportServer", 1033)
-	$configset.ReserveURL("ReportServerWebService", "http://+:80", 1033)
+	function Get-ConfigSet()
+	{
+		return Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14\Admin" `
+			-class MSReportServer_ConfigurationSetting -ComputerName localhost
+	}
 
-	# Did the name change?
-	$configset.SetVirtualDirectory("ReportServerWebApp", "Reports", 1033)
-	$configset.ReserveURL("ReportServerWebApp", "http://+:80", 1033)
+	# Allow importing of sqlps module
+	Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 
-	$configset.InitializeReportServer($configset.InstallationID)
-
-
-	# Import the SQL Server PowerShell module
-	Import-Module sqlps -DisableNameChecking | Out-Null
-
-	# Re-start services?
-	$configset.SetServiceState($false, $false, $false)
-	Restart-Service $configset.ServiceName
-	$configset.SetServiceState($true, $true, $true)
-
-	# Update the current configuration
+	# Retrieve the current configuration
 	$configset = Get-ConfigSet
 
-	$configset.IsReportManagerEnabled
-	$configset.IsInitialized
-	$configset.IsWebServiceEnabled
-	$configset.IsWindowsServiceEnabled
-	$configset.ListReportServersInDatabase()
-	$configset.ListReservedUrls();
+	$configset
+	If (! $configset.IsInitialized)
+	{
+		#Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo
+		[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.ConnectionInfo")
+		# Get the ReportServer and ReportServerTempDB creation script
+		[string]$dbscript = $configset.GenerateDatabaseCreationScript("ReportServer", 1033, $false).Script
+		# Establish a connection to the
+		$conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
+		#$conn = New-Object system.Data.SqlClient.SqlConnection
+		$conn.ServerInstance = $SQLServerInstance
+		$conn.LoginSecure = $FALSE
+		$conn.Login = "sa"
+		$conn.Password = "Epicor123"
+		#Connect to the local, default instance of SQL Server
+		#Add-Type -AssemblyName Microsoft.SqlServer.ConnectionInfo
+		[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Smo")
+		$smo = new-object Microsoft.SqlServer.Management.Smo.Server($conn)
+		# Create the ReportServer and ReportServerTempDB databases
+		$db = $smo.Databases["master"]
+		$db.ExecuteNonQuery($dbscript)
+		# Set permissions for the databases
+		$dbscript = $configset.GenerateDatabaseRightsScript($configset.WindowsServiceIdentityConfigured, "ReportServer", $false, $true).Script
+		#$dbscript = $configset.GenerateDatabaseRightsScript("localhost\qatools", "ReportServer", $false, $false).Script
+		$db.ExecuteNonQuery($dbscript)
 
-	$inst = Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" -class MSReportServer_Instance -ComputerName localhost
-	$inst.GetReportServerUrls()
+		# Set the database connection info
+		$configset.SetDatabaseConnection($SQLServerInstance, "ReportServer", 2, "", "")
+		$configset.SetVirtualDirectory("ReportServerWebService", "ReportServer", 1033)
+		$configset.ReserveURL("ReportServerWebService", "http://+:80", 1033)
+
+		# Did the name change?
+		$configset.SetVirtualDirectory("ReportServerWebApp", "Reports", 1033)
+		$configset.ReserveURL("ReportServerWebApp", "http://+:80", 1033)
+
+		$configset.InitializeReportServer($configset.InstallationID)
+
+
+		# Import the SQL Server PowerShell module
+		Import-Module sqlps -DisableNameChecking | Out-Null
+
+		# Re-start services?
+		$configset.SetServiceState($false, $false, $false)
+		Restart-Service $configset.ServiceName
+		$configset.SetServiceState($true, $true, $true)
+
+		# Update the current configuration
+		$configset = Get-ConfigSet
+
+		$configset.IsReportManagerEnabled
+		$configset.IsInitialized
+		$configset.IsWebServiceEnabled
+		$configset.IsWindowsServiceEnabled
+		$configset.ListReportServersInDatabase()
+		$configset.ListReservedUrls();
+
+		$inst = Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" -class MSReportServer_Instance -ComputerName localhost
+		$inst.GetReportServerUrls()
+	}
+}
+catch 
+{
+	LogError
+    break
+}
+finally 
+{
+	#Remove SSRS Installer
+	Remove-Item -Path $$targetDir$blobSSRS -ErrorAction SilentlyContinue
 }

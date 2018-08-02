@@ -66,7 +66,7 @@ function LogError {
 Function LogWrite ([string]$logstring)
 {
     Add-content $Logfile -value ((Get-Date).ToString()+ ": " +$logstring)
-    LogMessage ((Get-Date).ToString()+ ": " +$logstring)
+    Write-Host ((Get-Date).ToString()+ ": " +$logstring)
 }
 Remove-Item $Logfile -ErrorAction SilentlyContinue
 
@@ -184,6 +184,15 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     LogWrite ("############## Launch Conversion Runner ######################")
     try{
         Start-ConversionRunner -E10Version $erpVersion$erpPatch -EpicorSmartClientFolder ($erpInstallPatch + "LocalClients\" + $appserverName) -LogFilesPath $logfilesdir -SysConfigFilePath ($erpInstallPatch + "LocalClients\" + $appserverName + "\Config\" + $appserverName +".sysconfig") -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
+    }
+    catch{
+        LogError
+        break
+    }
+
+    LogWrite ("############## Create Task Agent ######################")
+    try{
+        Add-TaskAgent -E10Version $erpVersion$erpPatch -LogFilesPath $logfilesdir -TaskAgentName ($appServerName + "Agent") -EpicorAppserverUri "https://$env:ComputerName/$appServerName" -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
     }
     catch{
         LogError
