@@ -158,16 +158,16 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    finally 
+    <#finally 
     {
         #Remove ERP ISO
-        Remove-Item -Path $targetDir"RL"$erpVersion".iso" -ErrorAction SilentlyContinue
+        Remove-Item -Path $targetDir"RL"$erpVersion".0.iso" -ErrorAction SilentlyContinue
         if($erpPatch -ne ".0")
         {
             #Remove Update exe
             Remove-Item -Path $targetDir"UD"$erpVersion$erpPatch".exe" -ErrorAction SilentlyContinue
         }
-    }
+    }#>
 
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
@@ -200,12 +200,12 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         break
     }
 
-    LogWrite ("############## Create Task Agent ######################")
+   <# LogWrite ("############## Create Task Agent ######################")
     try{
         Add-TaskAgent -E10Version $erpVersion$erpPatch -LogFilesPath $logfilesdir -TaskAgentName ($appServerName + "Agent") -EpicorAppserverUri "https://$env:ComputerName/$appServerName" -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
     }
     catch{
         LogError
         break
-    }
+    }#>
 }
