@@ -78,7 +78,7 @@ finally
 	Remove-Item -Path $SqlServerIsoImagePath -ErrorAction SilentlyContinue
 }
 try{
-	##################### Install SSMS #############################
+LogWrite ("	##################### Install SSMS #############################")
 	# Set file and folder path for SSMS installer .exe
 	$filepath="$targetDir$blobSSMS"
 	$Parms = " /Install /Quiet /Norestart /Logs log.txt"
@@ -94,7 +94,7 @@ try{
 	$clnt.DownloadFile($url,$filepath)
 	}
 	#>
-	##################### Install SSRS ############################
+LogWrite ("	##################### Install SSRS ############################")
 	$Parms = "/IAcceptLicenseTerms /PID=PHDV4-3VJWD-N7JVP-FGPKY-XBV89  /norestart /quiet"
 	Start-Process -FilePath $targetDir$blobSSRS -ArgumentList $Parms -Wait
 }
@@ -108,10 +108,9 @@ finally
 	#Remove SSMS Installer
 	Remove-Item -Path $targetDir$blobSSMS -ErrorAction SilentlyContinue
 }
-try{
-	##################  SSRS Configuration ##################
+LogWrite ("	##################  SSRS Configuration ##################")
 	rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
-
+try{
 	function Get-ConfigSet()
 	{
 		return Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14\Admin" `
