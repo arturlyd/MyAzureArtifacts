@@ -15,7 +15,7 @@ $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTE
 #$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($username)", $password)
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
     #Make sure the installers directory exists so subsequent scripts can access the location without issues.
-    Install-Module -Name AzureRM
+    Import-Module -Name AzureRM
     $targetDir = "c:\EpicorInstallers\"
     $Logfile = ("$targetDir\logfiles\ERPW16Roles.log")
     if(!(Test-Path -Path "$targetDir\logfiles" )){
