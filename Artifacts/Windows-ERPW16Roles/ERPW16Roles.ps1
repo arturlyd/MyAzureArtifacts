@@ -14,8 +14,9 @@ $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTE
 #$username = $env:USERNAME
 #$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($username)", $password)
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
+    #isntall Azure Powershell to interact with the storage account files
+    choco install azurepowershell --force 
     #Make sure the installers directory exists so subsequent scripts can access the location without issues.
-    Import-Module -Name AzureRM
     $targetDir = "c:\EpicorInstallers\"
     $Logfile = ("$targetDir\logfiles\ERPW16Roles.log")
     if(!(Test-Path -Path "$targetDir\logfiles" )){
