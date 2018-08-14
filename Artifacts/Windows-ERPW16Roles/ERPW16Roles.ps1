@@ -14,8 +14,6 @@ $credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTE
 #$username = $env:USERNAME
 #$credential = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\$($username)", $password)
 Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
-    #isntall Azure Powershell to interact with the storage account files
-    choco install azurepowershell --force 
     #Make sure the installers directory exists so subsequent scripts can access the location without issues.
     $targetDir = "c:\EpicorInstallers\"
     $Logfile = ("$targetDir\logfiles\ERPW16Roles.log")
@@ -62,6 +60,9 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBl
         LogError
         break
     }
+    #isntall Azure Powershell to interact with the storage account files
+    choco install azurepowershell --force 
+    
     #The below will install all required Roles and Features, this may require a reboot - Commented to use Install-ErpPrerequisities
     #Install-WindowsFeature FileAndStorage-Services,File-Services,FS-FileServer,Storage-Services,Web-Server,Web-WebServer,Web-Common-Http,Web-Default-Doc,Web-Dir-Browsing,Web-Http-Errors,Web-Static-Content,Web-Http-Redirect,Web-Health,Web-Http-Logging,Web-Request-Monitor,Web-Http-Tracing,Web-Performance,Web-Stat-Compression,Web-Security,Web-Filtering,Web-Windows-Auth,Web-App-Dev,Web-Net-Ext45,Web-Asp-Net45,Web-ISAPI-Ext,Web-ISAPI-Filter,Web-Includes,Web-Mgmt-Tools,Web-Mgmt-Console,Web-Mgmt-Compat,Web-Metabase,NET-Framework-Features,NET-Framework-Core,NET-Non-HTTP-Activ,NET-Framework-45-Features,NET-Framework-45-Core,NET-Framework-45-ASPNET,NET-WCF-Services45,NET-WCF-HTTP-Activation45,NET-WCF-TCP-Activation45,NET-WCF-TCP-PortSharing45,FS-SMB1,WAS,WAS-Process-Model,WAS-NET-Environment,WAS-Config-APIs,Search-Service,WoW64-Support
     ####this will set Windows Search service to start automatically, required for Epicor Help
