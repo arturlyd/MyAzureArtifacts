@@ -109,16 +109,16 @@ finally
 	Remove-Item -Path $targetDir$blobSSMS -ErrorAction SilentlyContinue
 }
 LogWrite ("	##################  SSRS Configuration ##################")
-	rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
-try{
+####BORRAR?>>>>
+	#rsconfig -c -s $SQLServerInstance -d ReportServer -a SQL -u sa -p Epicor123 -i SSRS
 	function Get-ConfigSet()
 	{
 		return Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14\Admin" `
 			-class MSReportServer_ConfigurationSetting -ComputerName localhost
 	}
 
-	# Allow importing of sqlps module
-	Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
+	# Allow importing of sqlps module####BORRAR?>>>>
+	#Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Force
 
 	# Retrieve the current configuration
 	$configset = Get-ConfigSet
@@ -182,14 +182,7 @@ try{
 		$inst = Get-WmiObject -Namespace "root\Microsoft\SqlServer\ReportServer\RS_SSRS\v14" -class MSReportServer_Instance -ComputerName localhost
 		$inst.GetReportServerUrls()
 	}
-}
-catch 
-{
-	LogError
-    break
-}
-finally 
-{
+
 	#Remove SSRS Installer
 	Remove-Item -Path $$targetDir$blobSSRS -ErrorAction SilentlyContinue
-}
+
