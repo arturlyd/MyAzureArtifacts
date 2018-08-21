@@ -30,13 +30,13 @@ $containerName = "isos"
 $licContainerName = "licenses"
 $targetDir = "c:\EpicorInstallers\"
 $logfilesdir = "$targetDir\logfiles"
-$dbBackup = "Demo32200Build6.bak"
+$dbBackup = "Demo32200Build6.bak" ####
 $targetSqlUser = "sa"
 $targetSqlPassword = "Epicor123"
 $defaultWebSiteName = "Default Web Site"
 $computerName = $env:ComputerName
 $erpVersion = "10.2.200"
-$erpPatch = ".10"
+$erpPatch = ".11"
 $epicorGSM = "epicor"
 $epicorPass = "epicor"
 $apppoolUserName = "$env:ComputerName\$env:USERNAME"
@@ -46,7 +46,6 @@ $sqlDataSource = [System.Data.Sql.SqlDataSourceEnumerator]::Instance.GetDataSour
 $sqlInstance = $sqlDataSource.ServerName + "\" +  $sqlDataSource.InstanceName
 $sqlFilesLoc = "c:\SQLFiles\"
 $ssrsDBName = "SSRS"
-$ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer"
 $ssrsBaseURL = "http://$env:ComputerName/ReportServer"
 $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
@@ -172,6 +171,15 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
     try{
+        #set the correct SSRS path depending if SQL server version
+        if($sqlDataSource.InstanceName -eq "2017")
+        {
+                $ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer"
+        }
+        else 
+        {
+            $ssrsServerInstallPath = C:\Program Files\Microsoft SQL Server\MSRS13.SQL2016\Reporting Services\ReportServer
+        }
         Install-ErpAppserver -E10Version $erpVersion$erpPatch -LogFilesPath $logfilesdir -AppserverName $appserverName -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -UseApppoolIdentity $true -ApplicationPoolUserName $apppoolUserName -ApplicationPoolUserPassword (ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force) -EpicorDatabaseName $appserverName -HttpsBinding $erpBinding -DNSIdentity $erpCert -ServerName $env:ComputerName -CreateSsrsDatabase $true -ConfigureSsrsReports $true -SsrsDatabaseName $ssrsDBName -SsrsInstallLocation $ssrsServerInstallPath -SSRSBaseUrl $ssrsBaseURL -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -CheckForBugFixes
     }
     catch{
