@@ -178,7 +178,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         }
         else 
         {
-            $ssrsServerInstallPath = C:\Program Files\Microsoft SQL Server\MSRS13.SQL2016\Reporting Services\ReportServer
+            $ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server\MSRS13.SQL2016\Reporting Services\ReportServer"
         }
         Install-ErpAppserver -E10Version $erpVersion$erpPatch -LogFilesPath $logfilesdir -AppserverName $appserverName -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -UseApppoolIdentity $true -ApplicationPoolUserName $apppoolUserName -ApplicationPoolUserPassword (ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force) -EpicorDatabaseName $appserverName -HttpsBinding $erpBinding -DNSIdentity $erpCert -ServerName $env:ComputerName -CreateSsrsDatabase $true -ConfigureSsrsReports $true -SsrsDatabaseName $ssrsDBName -SsrsInstallLocation $ssrsServerInstallPath -SSRSBaseUrl $ssrsBaseURL -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -CheckForBugFixes
     }
@@ -208,12 +208,12 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         break
     }
 
-   <# LogWrite ("############## Create Task Agent ######################")
+    LogWrite ("############## Create Task Agent ######################")
     try{
         Add-TaskAgent -E10Version $erpVersion$erpPatch -LogFilesPath $logfilesdir -TaskAgentName ($appServerName + "Agent") -EpicorAppserverUri "https://$env:ComputerName/$appServerName" -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force)
     }
     catch{
         LogError
         break
-    }#>
+    }
 }
