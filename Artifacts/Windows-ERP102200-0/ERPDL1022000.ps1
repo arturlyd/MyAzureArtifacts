@@ -172,7 +172,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
     LogWrite ("############ Deploy Appserver + Reports ###############")
     try{
         #set the correct SSRS path depending if SQL server version
-        if($sqlDataSource.InstanceName -eq "2017")
+        if($sqlDataSource.InstanceName -eq "SQL2017")
         {
                 $ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer"
         }
