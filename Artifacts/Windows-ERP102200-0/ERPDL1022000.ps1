@@ -46,7 +46,6 @@ $sqlDataSource = [System.Data.Sql.SqlDataSourceEnumerator]::Instance.GetDataSour
 $sqlInstance = $sqlDataSource.ServerName + "\" +  $sqlDataSource.InstanceName
 $sqlFilesLoc = "c:\SQLFiles\"
 $ssrsDBName = "SSRS"
-$ssrsBaseURL = "http://$env:ComputerName/ReportServer"
 $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
@@ -175,10 +174,12 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         if($sqlDataSource.InstanceName -eq "SQL2017")
         {
                 $ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server Reporting Services\SSRS\ReportServer"
+                $ssrsBaseURL = "http://$env:ComputerName/ReportServer"
         }
         else 
         {
             $ssrsServerInstallPath = "C:\Program Files\Microsoft SQL Server\MSRS13.SQL2016\Reporting Services\ReportServer"
+            $ssrsBaseURL = "http://$env:ComputerName/ReportServer_SQL2016"
         }
         Install-ErpAppserver -E10Version $erpVersion$erpPatch -LogFilesPath $logfilesdir -AppserverName $appserverName -EpicorUserName $epicorGSM -EpicorUserPassword (ConvertTo-SecureString -String $epicorPass -AsPlainText -Force) -UseApppoolIdentity $true -ApplicationPoolUserName $apppoolUserName -ApplicationPoolUserPassword (ConvertTo-SecureString -String "Epicor123" -AsPlainText -Force) -EpicorDatabaseName $appserverName -HttpsBinding $erpBinding -DNSIdentity $erpCert -ServerName $env:ComputerName -CreateSsrsDatabase $true -ConfigureSsrsReports $true -SsrsDatabaseName $ssrsDBName -SsrsInstallLocation $ssrsServerInstallPath -SSRSBaseUrl $ssrsBaseURL -TargetSqlServer $sqlInstance -TargetSqlUser $targetSqlUser -TargetSqlPassword (ConvertTo-SecureString -String $targetSqlPassword -AsPlainText -Force) -CheckForBugFixes
     }
