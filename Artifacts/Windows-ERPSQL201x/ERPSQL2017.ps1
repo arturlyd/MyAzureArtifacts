@@ -184,5 +184,5 @@ LogWrite ("	##################  SSRS Configuration ##################")
 	}
 
 	#Remove SSRS Installer
-	Remove-Item -Path $$targetDir$blobSSRS -ErrorAction SilentlyContinue
+	Remove-Item -Path $targetDir$blobSSRS -ErrorAction SilentlyContinue
 

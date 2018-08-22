@@ -156,7 +156,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
         LogError
         break
     }
-    <#finally 
+    finally 
     {
         #Remove ERP ISO
         Remove-Item -Path $targetDir"RL"$erpVersion".0.iso" -ErrorAction SilentlyContinue
@@ -165,7 +165,7 @@ Remove-Item $Logfile -ErrorAction SilentlyContinue
             #Remove Update exe
             Remove-Item -Path $targetDir"UD"$erpVersion$erpPatch".exe" -ErrorAction SilentlyContinue
         }
-    }#>
+    }
 
     ############ Deploy Appserver + Reports ###############
     LogWrite ("############ Deploy Appserver + Reports ###############")
