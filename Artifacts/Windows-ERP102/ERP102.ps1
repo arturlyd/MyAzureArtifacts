@@ -5,11 +5,12 @@
 
 	- This script does the following -
         - Installs PS.ERP/Core modules for Choco instructions
-		- Downloads ERP 10.2.200.0 and its demo database
+		- Downloads ERP 10.2 + Update and its demo database
         - Creates Certificate
         - Creates a new appserver
         - Install license
         - Runs Conversions
+        - Adds a task agent
 
 
 
@@ -17,10 +18,18 @@
 
 
 ##################################################
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)]
+    [string] $erpver = "10.2.200 Latest GA"
+ )
+
 $password = ConvertTo-SecureString "Epicor123" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential("$env:USERDOMAIN\qatools", $password)
 
-Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBlock{
+Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ArgumentList $erpver -ScriptBlock{
+Param( $erpver )
+. ([ScriptBlock]::Create($erpver))
 
 $StorageAccountName = "aqatoolslab2420"
 $blobUri = "https://aqatoolslab2420.blob.core.windows.net/"
@@ -30,18 +39,14 @@ $containerName = "isos"
 $licContainerName = "licenses"
 $targetDir = "c:\EpicorInstallers\"
 $logfilesdir = "$targetDir\logfiles"
-$dbBackup = "Demo32200Build6.bak" 
 $targetSqlUser = "sa"
 $targetSqlPassword = "Epicor123"
 $defaultWebSiteName = "Default Web Site"
 $computerName = $env:ComputerName
-$erpVersion = "10.2.200"
-$erpPatch = ".11"
 $epicorGSM = "epicor"
 $epicorPass = "epicor"
 $apppoolUserName = "$env:ComputerName\$env:USERNAME"
 $erpBinding = "HttpsBinaryUsernameChannel"
-$appServerName = "ERP102200"
 $sqlDataSource = [System.Data.Sql.SqlDataSourceEnumerator]::Instance.GetDataSources()|Where-Object{$_.ServerName -eq $env:COMPUTERNAME}
 $sqlInstance = $sqlDataSource.ServerName + "\" +  $sqlDataSource.InstanceName
 $sqlFilesLoc = "c:\SQLFiles\"
@@ -49,7 +54,40 @@ $ssrsDBName = "SSRS"
 $licenseID = "115506.lic"
 $erpInstallPatch = "C:\Epicor\Erp10\" #pending to be supported
 
-$Logfile = ("$targetDir\logfiles\" + "ERP10.2.200.log")
+if($erpver -eq "10.2.100 Base"){
+    $erpVersion = "10.2.100"
+    $erpPatch = ".0"
+    $dbBackup = "Demo321000B5.bak"
+    $appServerName = "ERP102100"
+    LogWrite ("Deploying $erpVersion$erpPatch")
+}
+elseif($erpver -eq "10.2.100 Latest GA") {
+    $latestccOnAzure = Get-AzureStorageBlob -Container $containerName -Context $storageContext | Where-Object {$_.name -match "UD10.2.200"}
+    $latestccOnAzure = $latestccOnAzure.Name.Split(".",[System.StringSplitOptions]::RemoveEmptyEntries)[-2]
+    $erpVersion = "10.2.100"
+    $erpPatch = ".$latestccOnAzure"
+    $dbBackup = "Demo321000B5.bak"
+    $appServerName = "ERP102100"
+    LogWrite ("Deploying Latest 100 GA version is: $erpVersion$erpPatch")
+}
+elseif($erpver -eq "10.2.200 Base"){
+    $erpVersion = "10.2.100"
+    $erpPatch = ".0"
+    $dbBackup = "Demo32200Build6.bak"
+    $appServerName = "ERP102200"
+    LogWrite ("Deploying $erpVersion$erpPatch")
+}
+elseif($erpver -eq "10.2.200 Latest GA") {
+    $latestccOnAzure = Get-AzureStorageBlob -Container $containerName -Context $storageContext | Where-Object {$_.name -match "UD10.2.200"}
+    $latestccOnAzure = $latestccOnAzure.Name.Split(".",[System.StringSplitOptions]::RemoveEmptyEntries)[-2]
+    $erpVersion = "10.2.100"
+    $erpPatch = ".$latestccOnAzure"
+    $dbBackup = "Demo32200Build6.bak"
+    $appServerName = "ERP102200"
+    LogWrite ("Deploying Latest 200 GA version is: $erpVersion$erpPatch")
+}
+
+$Logfile = ("$targetDir\logfiles\" + "ERP10.2.log")
 if(!(Test-Path -Path "$targetDir\logfiles" )){
     New-Item -ItemType directory -Path $targetDir
 }
