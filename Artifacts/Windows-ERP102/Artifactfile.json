@@ -21,6 +21,6 @@
     }
   },
   "runCommand": {
-    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERP102.ps1', parameters('erpversion'))]"
+    "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Bypass -File ERP102.ps1 ', parameters('erpversion'))]"
   }
 }
