@@ -54,8 +54,13 @@ Invoke-Command -Credential $credential -ComputerName $env:COMPUTERNAME -ScriptBl
     #modules must be installed in one of these paths: [System.Environment]::GetEnvironmentVariable("PSModulePath")
     LogWrite ("############# Import PS Modules ###################")
     try{
-        choco upgrade epicorpserp -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" `
-                                -p "ilxf6um6qfqk7ikel5jipldvvfndjmzny63f3cl72b7exnpqt2hq" --force
+        #sometimes you may get Error 404 when downloading the core module. Talked with Israel and proposed workaround is 
+        #to manually download it and if it fails it will perform a retrial when deploying the PS ERP
+        #this workaround is until Israel adds retrial logic
+        choco upgrade epicorpscore -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" -p "ilxf6um6qfqk7ikel5jipldvvfndjmzny63f3cl72b7exnpqt2hq" --force
+        Import-Module Epicor.Ps.Core  
+
+        choco upgrade epicorpserp -s "https://epicor-corp.pkgs.visualstudio.com/_packaging/CNA/nuget/v2/" -u "epicor" -p "ilxf6um6qfqk7ikel5jipldvvfndjmzny63f3cl72b7exnpqt2hq" --force
         Import-Module Epicor.Ps.Erp -DisableNameChecking
     }
     catch
