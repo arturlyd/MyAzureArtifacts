@@ -62,10 +62,11 @@ if($erpver -eq "10.2.100 Base"){
     LogWrite ("Deploying $erpVersion$erpPatch")
 }
 elseif($erpver -eq "10.2.100 Latest GA") {
-    $latestccOnAzure = Get-AzureStorageBlob -Container $containerName -Context $storageContext | Where-Object {$_.name -match "UD10.2.200"}
+    $latestccOnAzure = Get-AzureStorageBlob -Container $containerName -Context $storageContext | Where-Object {$_.name -match "UD10.2.100"}
     $latestccOnAzure = $latestccOnAzure.Name.Split(".",[System.StringSplitOptions]::RemoveEmptyEntries)[-2]
     $erpVersion = "10.2.100"
-    $erpPatch = ".$latestccOnAzure"
+    if($latestccOnAzure -eq "."){$erpPatch = ".0"} #if no UD installer found in blob take base
+    else{$erpPatch = ".$latestccOnAzure"}
     $dbBackup = "Demo321000B5.bak"
     $appServerName = "ERP102100"
     LogWrite ("Deploying Latest 100 GA version is: $erpVersion$erpPatch")
@@ -81,7 +82,8 @@ elseif($erpver -eq "10.2.200 Latest GA") {
     $latestccOnAzure = Get-AzureStorageBlob -Container $containerName -Context $storageContext | Where-Object {$_.name -match "UD10.2.200"}
     $latestccOnAzure = $latestccOnAzure.Name.Split(".",[System.StringSplitOptions]::RemoveEmptyEntries)[-2]
     $erpVersion = "10.2.100"
-    $erpPatch = ".$latestccOnAzure"
+    if($latestccOnAzure -eq "."){$erpPatch = ".0"} #if no UD installer found in blob take base
+    else{$erpPatch = ".$latestccOnAzure"}
     $dbBackup = "Demo32200Build6.bak"
     $appServerName = "ERP102200"
     LogWrite ("Deploying Latest 200 GA version is: $erpVersion$erpPatch")
